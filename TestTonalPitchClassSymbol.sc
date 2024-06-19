@@ -19,4 +19,11 @@ TestTonalPitchClassSymbol : UnitTest {
       this.assert(\a.numFlats == 0);
       this.assert(\abb.numFlats == 2);
    }
+
+   test_numSharps_returnsNumSharps {
+      this.assert(\as.numSharps == 1);
+      this.assert(\a.numSharps == 0);
+      this.assert(\ass.numSharps == 2);
+      this.assert('a##'.numSharps == 2);
+   }
 }

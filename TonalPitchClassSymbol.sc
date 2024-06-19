@@ -24,6 +24,10 @@ TonalPitchClassSymbol {
    *numFlats { |tpc|
       ^tpc.asString.count({ |c| c == $b });
    }
+   
+   *numSharps { |tpc|
+      ^tpc.asString.count({ |c| (c == $#) || (c == $s) });
+   }
 
 }
 
@@ -31,4 +35,5 @@ TonalPitchClassSymbol {
    natural {^TonalPitchClassSymbol.natural(this)}
    withAccidentals { |num, accidental| ^TonalPitchClassSymbol.withAccidentals(this, num, accidental)}
    numFlats {^TonalPitchClassSymbol.numFlats(this)}
+   numSharps {^TonalPitchClassSymbol.numSharps(this)}
 }
