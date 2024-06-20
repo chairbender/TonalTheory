@@ -29,5 +29,7 @@ TestTonalPitchClassSymbol : UnitTest {
 
     test_nextNaturalTPC {
         this.assert(\a.nextNaturalTPC == \b);
+        this.assert(\ass.nextNaturalTPC == \b);
+        this.assert(\g.nextNaturalTPC == \a);
     }
 }

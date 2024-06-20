@@ -10,8 +10,8 @@ TonalPitchClassSymbol {
     classvar <naturalsInverted;
 
     *initClass {
-        naturals = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5); 
-        naturalsInverted = naturals.collect
+        naturals = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6); 
+        naturalsInverted = naturals.invert;
     }
 
     // return the TPC without accidentals
@@ -39,9 +39,12 @@ TonalPitchClassSymbol {
     be \C
     */
     *nextNaturalTPC { |tpc|
-        var natural = natural(tpc);
-        var idx = naturals[natural];
-        ^naturalsInverted[(idx+1)];
+        var natural, idx;
+        natural = natural(tpc);
+        natural.postln;
+        idx = naturals[natural];
+        idx.postln;
+        ^naturalsInverted[(idx+1)%7];
     }
 
 }
