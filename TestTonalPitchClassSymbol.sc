@@ -4,14 +4,14 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(TonalPitchClassSymbol.naturals[\f] == 5);
     }
 
-    test_natural_withAccidentals {
+    test_natural_withAlterations {
         this.assert(\as.natural == \a);
         this.assert('a#'.natural == \a);
     }
 
-    test_naturalWithAccidentals {
-        this.assert('a'.withAccidentals(2, "#") == 'a##');
-        this.assert('a#'.withAccidentals(2, "#") == 'a###');
+    test_naturalWithAlterations {
+        this.assert('a'.withAlterations(2, "#") == 'a##');
+        this.assert('a#'.withAlterations(2, "#") == 'a###');
     }
 
     test_numFlats {
@@ -50,5 +50,13 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\b.semitonesTo(\a) == -2);
         this.assert(\a.semitonesTo(\g) == 10);
         this.assert(\g.semitonesTo(\a) == -10);
+    }
+
+    test_alterations {
+        this.assert(\a.alterations == "");
+        this.assert(\b.alterations == "");
+        this.assert(\as.alterations == "s");
+        this.assert(\ass.alterations == "ss");
+        this.assert(\abb.alterations == "bb");
     }
 }

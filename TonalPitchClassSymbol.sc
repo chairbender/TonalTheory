@@ -21,14 +21,14 @@ TonalPitchClassSymbol {
         ^tpc.asString.toLower.asSymbol;
     }
 
-    // return the TPC without accidentals
+    // return the TPC without alterations
     *natural { |tpc|
         ^this.normalize(tpc).asString[0].asSymbol;
     }
 
-    // append num accidentals to tpc
-    *withAccidentals { |tpc, num, accidental|
-        var str = this.normalize(tpc).asString ++ Array.fill(num, {accidental}).join;
+    // append num alterations to tpc
+    *withAlterations { |tpc, num, alteration|
+        var str = this.normalize(tpc).asString ++ Array.fill(num, {alteration}).join;
         ^str.asSymbol;
     }
 
@@ -47,7 +47,7 @@ TonalPitchClassSymbol {
     }
 
     /* Returns the 'natural' pitch class that is one higher
-    than the given pitch class. 'Natural' here means without an accidental.
+    than the given pitch class. 'Natural' here means without an alteration.
     So, if \Bb is given, the next natural will be \C. If \Bs is given, the next natural will
     be \C
     */
@@ -64,20 +64,26 @@ TonalPitchClassSymbol {
         ^this.naturalSemitones[this.normalize(this.natural(tpc))] + numSharps(tpc) - numFlats(tpc);
     }
 
-    /* Returns an integer indicating the offset in semitones of otherTPC from tpc, if
-    they were notes in the same octave. This accounts for accidentals as well.
+    /* Returns an integer indicating the offset in semitones from tpc to otherTPC, if
+    they were notes in the same octave. This accounts for alterations as well.
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
     *semitonesTo{ |tpc, otherTPC|
-        ^(this.semisFromA(otherTPC) - this.semisFromA(tpc));
+        ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
+    }
+
+    /* Returns the alterations of the TPC as a string. Empty string if none. */
+    *alterations{ |tpc|
+        ^(if (tpc.asString.size > 1, {tpc.asString[1..]},{""}));
     }
 }
 
 + Symbol {
     natural {^TonalPitchClassSymbol.natural(this)}
-    withAccidentals { |num, accidental| ^TonalPitchClassSymbol.withAccidentals(this, num, accidental)}
+    withAlterations { |num, alteration| ^TonalPitchClassSymbol.withAlterations(this, num, alteration)}
     numFlats {^TonalPitchClassSymbol.numFlats(this)}
     numSharps {^TonalPitchClassSymbol.numSharps(this)}
     nextNatural {^TonalPitchClassSymbol.nextNatural(this)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
     semitonesTo {|otherTPC| ^TonalPitchClassSymbol.semitonesTo(this,otherTPC)}
+    alterations {^TonalPitchClassSymbol.alterations(this)}
 }
