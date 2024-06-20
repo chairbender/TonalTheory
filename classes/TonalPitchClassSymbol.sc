@@ -18,7 +18,7 @@ TonalPitchClassSymbol {
     }
 
     *normalize { |tpc|
-        ^tpc.asString.toLower.replace("s","#").asSymbol;
+        ^tpc.asString.toLower.replace("#","s").asSymbol;
     }
 
     // return the TPC without alterations
@@ -32,10 +32,18 @@ TonalPitchClassSymbol {
         ^str.asSymbol;
     }
 
+    /* given a dict mapping from a natural TPC to the
+    number of semitone alterations made by the key signature 
+    (i.e. the output of KeySignature.alterationSemisDict),
+    alter the given natural TPC by the given alterations in the dict */
+    *withKeyAlterations { |naturalTPC, alterationsDict|
+        ^naturalTPC.withAlterationSemis(alterationsDict[naturalTPC]);
+    }
+
     /* append sharps/flats to tpc equivalent to the specified number of semis (semitones)
     with positive = sharps, negative = flats */
     *withAlterationSemis{ |tpc, semis|
-        ^if (semis > 0) {this.withAlterations(tpc, semis, "#")} {this.withAlterations(tpc, semis * -1, "b")};
+        ^if (semis > 0) {this.withAlterations(tpc, semis, "s")} {this.withAlterations(tpc, semis * -1, "b")};
     }
 
     *numFlats { |tpc|
@@ -52,20 +60,16 @@ TonalPitchClassSymbol {
         ^naturals[natural];
     }
 
-    /* Returns the 'natural' pitch class that is one higher
+    /* Returns the 'natural' pitch class that is steps higher
     than the given pitch class. 'Natural' here means without an alteration.
-    So, if \Bb is given, the next natural will be \C. If \Bs is given, the next natural will
-    be \C
+    So, if \Bb is given, the 1st next natural will be \C, the 2n next will be D, etc...
+    If \Bs is given, the next natural will be \C.
+    Steps may be negative, to move steps DOWN from the given TPC.
     */
-    *nextNatural { |tpc|
-        ^naturalsInverted[(this.naturalIdx(tpc)+1)%7];
+    *nextNatural { |tpc, steps|
+        ^naturalsInverted[(this.naturalIdx(tpc)+steps)%7];
     }
 
-    /* inverse of nextNatural */
-    *previousNatural { |tpc|
-        ^naturalsInverted[(this.naturalIdx(tpc)-1)%7];
-    }
-    
     *semisFromA { |tpc|
         ^this.naturalSemitones[this.normalize(this.natural(tpc))] + numSharps(tpc) - numFlats(tpc);
     }
@@ -89,9 +93,10 @@ TonalPitchClassSymbol {
     natural {^TonalPitchClassSymbol.natural(this)}
     withAlterations { |num, alteration| ^TonalPitchClassSymbol.withAlterations(this, num, alteration)}
     withAlterationSemis { |semis| ^TonalPitchClassSymbol.withAlterationSemis(this, semis)}
+    withKeyAlterations { |alterationsDict| ^TonalPitchClassSymbol.withKeyAlterations(this, alterationsDict)}
     numFlats {^TonalPitchClassSymbol.numFlats(this)}
     numSharps {^TonalPitchClassSymbol.numSharps(this)}
-    nextNatural {^TonalPitchClassSymbol.nextNatural(this)}
+    nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
     semitonesTo {|otherTPC| ^TonalPitchClassSymbol.semitonesTo(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}

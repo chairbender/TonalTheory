@@ -11,12 +11,17 @@ TestTonalPitchClassSymbol : UnitTest {
 
     test_naturalWithAlterations {
         this.assert('a'.withAlterations(2, "#") == 'a##');
-        this.assert('a#'.withAlterations(2, "#") == 'a###');
+        this.assert('a#'.withAlterations(2, "#") == 'as##');
     }
 
     test_withAlterationSemis {
-        this.assert('a'.withAlterationSemis(2) == 'a##');
+        this.assert('a'.withAlterationSemis(2) == 'ass');
         this.assert('a'.withAlterationSemis(-2) == 'abb');
+    }
+
+    test_withKeyAlterations {
+        this.assert('c'.withKeyAlterations(KeySignature.alterationSemisDict(\c)) == \c);
+        this.assert('c'.withKeyAlterations(KeySignature.alterationSemisDict(\fs)) == \cs);
     }
 
     test_numFlats {
@@ -33,17 +38,14 @@ TestTonalPitchClassSymbol : UnitTest {
     }
 
     test_nextNatural {
-        this.assert(\a.nextNatural == \b);
-        this.assert(\ass.nextNatural == \b);
-        this.assert(\g.nextNatural == \a);
+        this.assert(\a.nextNatural(1) == \b);
+        this.assert(\ass.nextNatural(1) == \b);
+        this.assert(\g.nextNatural(1) == \a);
+        this.assert(\g.nextNatural(2) == \b);
+        this.assert(\g.nextNatural(-2) == \e);
+        this.assert(\a.nextNatural(-2) == \f);
     }
     
-    test_previousNatural {
-        this.assert(\a.previousNatural == \g);
-        this.assert(\ass.previousNatural == \g);
-        this.assert(\g.previousNatural == \f);
-    }
-
     test_semitonesTo {
         this.assert(\a.semitonesTo(\a) == 0);
         this.assert(\a.semitonesTo(\as) == 1);
