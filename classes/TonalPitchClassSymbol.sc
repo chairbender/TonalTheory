@@ -18,7 +18,7 @@ TonalPitchClassSymbol {
     }
 
     *normalize { |tpc|
-        ^tpc.asString.toLower.asSymbol;
+        ^tpc.asString.toLower.replace("s","#").asSymbol;
     }
 
     // return the TPC without alterations
@@ -26,10 +26,16 @@ TonalPitchClassSymbol {
         ^this.normalize(tpc).asString[0].asSymbol;
     }
 
-    // append num alterations to tpc
+    // append num alterations to tpc, where alteration is a string "#" or "b"
     *withAlterations { |tpc, num, alteration|
         var str = this.normalize(tpc).asString ++ Array.fill(num, {alteration}).join;
         ^str.asSymbol;
+    }
+
+    /* append sharps/flats to tpc equivalent to the specified number of semis (semitones)
+    with positive = sharps, negative = flats */
+    *withAlterationSemis{ |tpc, semis|
+        ^if (semis > 0) {this.withAlterations(tpc, semis, "#")} {this.withAlterations(tpc, semis * -1, "b")};
     }
 
     *numFlats { |tpc|
@@ -71,7 +77,9 @@ TonalPitchClassSymbol {
         ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
     }
 
-    /* Returns the alterations of the TPC as a string. Empty string if none. */
+    /* Returns the alterations of the TPC as a string. Empty string if none. 
+    TODO: rethink how alterations are represented based on usage of this. I don't
+    like this just being a string. Alterations should probably be symbols, maybe an array?*/
     *alterations{ |tpc|
         ^(if (tpc.asString.size > 1, {tpc.asString[1..]},{""}));
     }
@@ -80,10 +88,12 @@ TonalPitchClassSymbol {
 + Symbol {
     natural {^TonalPitchClassSymbol.natural(this)}
     withAlterations { |num, alteration| ^TonalPitchClassSymbol.withAlterations(this, num, alteration)}
+    withAlterationSemis { |semis| ^TonalPitchClassSymbol.withAlterationSemis(this, semis)}
     numFlats {^TonalPitchClassSymbol.numFlats(this)}
     numSharps {^TonalPitchClassSymbol.numSharps(this)}
     nextNatural {^TonalPitchClassSymbol.nextNatural(this)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
     semitonesTo {|otherTPC| ^TonalPitchClassSymbol.semitonesTo(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}
+    tpcEquals {|otherTPC| ^TonalPitchClassSymbol.normalize(this) == TonalPitchClassSymbol.normalize(otherTPC)}
 }

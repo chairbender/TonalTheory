@@ -14,6 +14,11 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert('a#'.withAlterations(2, "#") == 'a###');
     }
 
+    test_withAlterationSemis {
+        this.assert('a'.withAlterationSemis(2) == 'a##');
+        this.assert('a'.withAlterationSemis(-2) == 'abb');
+    }
+
     test_numFlats {
         this.assert(\ab.numFlats == 1);
         this.assert(\a.numFlats == 0);
@@ -58,5 +63,12 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\as.alterations == "s");
         this.assert(\ass.alterations == "ss");
         this.assert(\abb.alterations == "bb");
+    }
+
+    test_tpcEquals {
+        this.assert(\a.tpcEquals(\a));
+        this.assert(\a.tpcEquals(\A));
+        this.assert(\ass.tpcEquals('A##'));
+        this.assert(\abb.tpcEquals(\Abb));
     }
 }
