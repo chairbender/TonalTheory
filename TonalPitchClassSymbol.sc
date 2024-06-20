@@ -8,10 +8,13 @@ TonalPitchClassSymbol {
     classvar <naturals;
     // inverse of naturals (int value to natural symbol)
     classvar <naturalsInverted;
+    // number of semitones from a for each natural TPC
+    classvar <naturalSemitones;
 
     *initClass {
         naturals = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6); 
         naturalsInverted = naturals.invert;
+        naturalSemitones = (a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10);
     }
 
     *normalize { |tpc|
@@ -30,7 +33,7 @@ TonalPitchClassSymbol {
     }
 
     *numFlats { |tpc|
-        ^this.normalize(tpc).asString.count({ |c| c == $b });
+        ^this.normalize(tpc).asString.count({ |c, i| (i != 0) && (c == $b) });
     }
 
     *numSharps { |tpc|
@@ -56,6 +59,17 @@ TonalPitchClassSymbol {
     *previousNatural { |tpc|
         ^naturalsInverted[(this.naturalIdx(tpc)-1)%7];
     }
+    
+    *semisFromA { |tpc|
+        ^this.naturalSemitones[this.normalize(this.natural(tpc))] + numSharps(tpc) - numFlats(tpc);
+    }
+
+    /* Returns an integer indicating the offset in semitones of otherTPC from tpc, if
+    they were notes in the same octave. This accounts for accidentals as well.
+    The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
+    *semitonesTo{ |tpc, otherTPC|
+        ^(this.semisFromA(otherTPC) - this.semisFromA(tpc));
+    }
 }
 
 + Symbol {
@@ -65,4 +79,5 @@ TonalPitchClassSymbol {
     numSharps {^TonalPitchClassSymbol.numSharps(this)}
     nextNatural {^TonalPitchClassSymbol.nextNatural(this)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
+    semitonesTo {|otherTPC| ^TonalPitchClassSymbol.semitonesTo(this,otherTPC)}
 }

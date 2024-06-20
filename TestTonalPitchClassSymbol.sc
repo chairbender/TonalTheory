@@ -38,4 +38,17 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\ass.previousNatural == \g);
         this.assert(\g.previousNatural == \f);
     }
+
+    test_semitonesTo {
+        this.assert(\a.semitonesTo(\a) == 0);
+        this.assert(\a.semitonesTo(\as) == 1);
+        this.assert(\as.semitonesTo(\a) == -1);
+        this.assert(\a.semitonesTo(\bb) == 1);
+        this.assert(\bb.semitonesTo(\a) == -1);
+
+        this.assert(\a.semitonesTo(\b) == 2);
+        this.assert(\b.semitonesTo(\a) == -2);
+        this.assert(\a.semitonesTo(\g) == 10);
+        this.assert(\g.semitonesTo(\a) == -10);
+    }
 }
