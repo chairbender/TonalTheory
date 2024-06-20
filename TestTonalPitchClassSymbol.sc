@@ -27,9 +27,15 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert('a##'.numSharps == 2);
     }
 
-    test_nextNaturalTPC {
-        this.assert(\a.nextNaturalTPC == \b);
-        this.assert(\ass.nextNaturalTPC == \b);
-        this.assert(\g.nextNaturalTPC == \a);
+    test_nextNatural {
+        this.assert(\a.nextNatural == \b);
+        this.assert(\ass.nextNatural == \b);
+        this.assert(\g.nextNatural == \a);
+    }
+    
+    test_previousNatural {
+        this.assert(\a.previousNatural == \g);
+        this.assert(\ass.previousNatural == \g);
+        this.assert(\g.previousNatural == \f);
     }
 }

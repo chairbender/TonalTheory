@@ -37,20 +37,25 @@ TonalPitchClassSymbol {
         ^this.normalize(tpc).asString.count({ |c| (c == $#) || (c == $s) });
     }
 
+    *naturalIdx { |tpc|
+        var natural, idx;
+        natural = natural(this.normalize(tpc));
+        ^naturals[natural];
+    }
+
     /* Returns the 'natural' pitch class that is one higher
     than the given pitch class. 'Natural' here means without an accidental.
     So, if \Bb is given, the next natural will be \C. If \Bs is given, the next natural will
     be \C
     */
-    *nextNaturalTPC { |tpc|
-        var natural, idx;
-        natural = natural(this.normalize(tpc));
-        natural.postln;
-        idx = naturals[natural];
-        idx.postln;
-        ^naturalsInverted[(idx+1)%7];
+    *nextNatural { |tpc|
+        ^naturalsInverted[(this.naturalIdx(tpc)+1)%7];
     }
 
+    /* inverse of nextNatural */
+    *previousNatural { |tpc|
+        ^naturalsInverted[(this.naturalIdx(tpc)-1)%7];
+    }
 }
 
 + Symbol {
@@ -58,5 +63,6 @@ TonalPitchClassSymbol {
     withAccidentals { |num, accidental| ^TonalPitchClassSymbol.withAccidentals(this, num, accidental)}
     numFlats {^TonalPitchClassSymbol.numFlats(this)}
     numSharps {^TonalPitchClassSymbol.numSharps(this)}
-    nextNaturalTPC {^TonalPitchClassSymbol.nextNaturalTPC(this)}
+    nextNatural {^TonalPitchClassSymbol.nextNatural(this)}
+    previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
 }
