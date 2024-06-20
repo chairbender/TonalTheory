@@ -14,23 +14,27 @@ TonalPitchClassSymbol {
         naturalsInverted = naturals.invert;
     }
 
+    *normalize { |tpc|
+        ^tpc.asString.toLower.asSymbol;
+    }
+
     // return the TPC without accidentals
     *natural { |tpc|
-        ^tpc.asString[0].asSymbol;
+        ^this.normalize(tpc).asString[0].asSymbol;
     }
 
     // append num accidentals to tpc
     *withAccidentals { |tpc, num, accidental|
-        var str = tpc.asString ++ Array.fill(num, {accidental}).join;
+        var str = this.normalize(tpc).asString ++ Array.fill(num, {accidental}).join;
         ^str.asSymbol;
     }
 
     *numFlats { |tpc|
-        ^tpc.asString.count({ |c| c == $b });
+        ^this.normalize(tpc).asString.count({ |c| c == $b });
     }
 
     *numSharps { |tpc|
-        ^tpc.asString.count({ |c| (c == $#) || (c == $s) });
+        ^this.normalize(tpc).asString.count({ |c| (c == $#) || (c == $s) });
     }
 
     /* Returns the 'natural' pitch class that is one higher
@@ -40,7 +44,7 @@ TonalPitchClassSymbol {
     */
     *nextNaturalTPC { |tpc|
         var natural, idx;
-        natural = natural(tpc);
+        natural = natural(this.normalize(tpc));
         natural.postln;
         idx = naturals[natural];
         idx.postln;
