@@ -48,7 +48,7 @@ KeySignature {
     *alterationSemisDict { |diatonicRootTPC| 
         var alterations = (a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0);
         // flat or sharp key
-        var circleDirection = if ((diatonicRootTPC.tpcEquals(\f)) || (diatonicRootTPC.numFlats > 0), {-1}, {1});
+        var circleDirection = if ((diatonicRootTPC.tpcEquals(\f)) || (diatonicRootTPC.flats > 0), {-1}, {1});
         var alteration = if (circleDirection > 0, {"#"}, {"b"});
         // rotate on the circle until we reach the diatonic root
         // accumulating alterations as we go
@@ -60,9 +60,9 @@ KeySignature {
             steps = steps + circleDirection;
             circleTPC = this.circleSteps(steps); 
             // accumulate the alteration of the current sharp/flat of the signature
-            keyTPC = if(circleDirection>0,{this.nthSharp(steps)},{this.nthFlat(steps * -1)});   
+            keyTPC = if (circleDirection > 0, {this.nthSharp(steps)}, {this.nthFlat(steps * -1)});   
             alterations[keyTPC] = alterations[keyTPC] + circleDirection;
-            alteredTPC = circleTPC.withAlterationSemis(alterations[circleTPC]); 
+            alteredTPC = circleTPC.alterTPC(alterations[circleTPC]); 
         };
         ^alterations;
     }

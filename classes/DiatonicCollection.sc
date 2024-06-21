@@ -26,7 +26,7 @@ DiatonicCollection {
         var alterationsDict = KeySignature.alterationSemisDict(diatonicRootTPC);
         ^Array.fill(7, { |i|
             var nextNatural = diatonicRootTPC.nextNatural(i);
-            nextNatural.withAlterationSemis(alterationsDict[nextNatural]);
+            nextNatural.alterTPC(alterationsDict[nextNatural]);
         });
     }
 }

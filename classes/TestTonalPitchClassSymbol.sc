@@ -4,19 +4,19 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(TonalPitchClassSymbol.naturals[\f] == 5);
     }
 
-    test_natural_withAlterations {
+    test_natural_appendAlterations {
         this.assert(\as.natural == \a);
         this.assert('a#'.natural == \a);
     }
 
     test_naturalWithAlterations {
-        this.assert('a'.withAlterations(2, "#") == 'a##');
-        this.assert('a#'.withAlterations(2, "#") == 'as##');
+        this.assert('a'.appendAlterations(2, "#") == 'a##');
+        this.assert('a#'.appendAlterations(2, "#") == 'as##');
     }
 
-    test_withAlterationSemis {
-        this.assert('a'.withAlterationSemis(2) == 'ass');
-        this.assert('a'.withAlterationSemis(-2) == 'abb');
+    test_alterTPC {
+        this.assert('a'.alterTPC(2) == 'ass');
+        this.assert('a'.alterTPC(-2) == 'abb');
     }
 
     test_withKeyAlterations {
@@ -24,17 +24,17 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert('c'.withKeyAlterations(KeySignature.alterationSemisDict(\fs)) == \cs);
     }
 
-    test_numFlats {
-        this.assert(\ab.numFlats == 1);
-        this.assert(\a.numFlats == 0);
-        this.assert(\abb.numFlats == 2);
+    test_flats {
+        this.assert(\ab.flats == 1);
+        this.assert(\a.flats == 0);
+        this.assert(\abb.flats == 2);
     }
 
-    test_numSharps {
-        this.assert(\as.numSharps == 1);
-        this.assert(\a.numSharps == 0);
-        this.assert(\ass.numSharps == 2);
-        this.assert('a##'.numSharps == 2);
+    test_sharps {
+        this.assert(\as.sharps == 1);
+        this.assert(\a.sharps == 0);
+        this.assert(\ass.sharps == 2);
+        this.assert('a##'.sharps == 2);
     }
 
     test_nextNatural {
@@ -46,17 +46,17 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\a.nextNatural(-2) == \f);
     }
     
-    test_semitonesTo {
-        this.assert(\a.semitonesTo(\a) == 0);
-        this.assert(\a.semitonesTo(\as) == 1);
-        this.assert(\as.semitonesTo(\a) == -1);
-        this.assert(\a.semitonesTo(\bb) == 1);
-        this.assert(\bb.semitonesTo(\a) == -1);
+    test_semisTo {
+        this.assert(\a.semisTo(\a) == 0);
+        this.assert(\a.semisTo(\as) == 1);
+        this.assert(\as.semisTo(\a) == -1);
+        this.assert(\a.semisTo(\bb) == 1);
+        this.assert(\bb.semisTo(\a) == -1);
 
-        this.assert(\a.semitonesTo(\b) == 2);
-        this.assert(\b.semitonesTo(\a) == -2);
-        this.assert(\a.semitonesTo(\g) == 10);
-        this.assert(\g.semitonesTo(\a) == -10);
+        this.assert(\a.semisTo(\b) == 2);
+        this.assert(\b.semisTo(\a) == -2);
+        this.assert(\a.semisTo(\g) == 10);
+        this.assert(\g.semisTo(\a) == -10);
     }
 
     test_alterations {
@@ -72,5 +72,10 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\a.tpcEquals(\A));
         this.assert(\ass.tpcEquals('A##'));
         this.assert(\abb.tpcEquals(\Abb));
+    }
+
+    test_asNote {
+        this.assert(\a.asNote(1) == \a1);
+        this.assert(\a.asNote(-1) == \an1);
     }
 }

@@ -27,8 +27,17 @@ TonalPitchClassSymbol {
     }
 
     // append num alterations to tpc, where alteration is a string "#" or "b"
-    *withAlterations { |tpc, num, alteration|
-        var str = this.normalize(tpc).asString ++ Array.fill(num, {alteration}).join;
+    // does not work if adding flats when tpc already has sharps, and vice versa.
+    // for such alterations, use alterTPC instead
+    *appendAlterations { |tpc, num, alteration|
+        var str;
+        if ((alteration == "#" || alteration == "s") && (tpc.flats > 0)) {
+            Error("cannot add sharps when tpc already has flats").throw
+        };
+        if (alteration == "b" && (tpc.sharps > 0)) {
+            Error("cannot add flats when tpc already has sharps").throw
+        };
+        str = this.normalize(tpc).asString ++ Array.fill(num, {alteration}).join;
         ^str.asSymbol;
     }
 
@@ -37,20 +46,40 @@ TonalPitchClassSymbol {
     (i.e. the output of KeySignature.alterationSemisDict),
     alter the given natural TPC by the given alterations in the dict */
     *withKeyAlterations { |naturalTPC, alterationsDict|
-        ^naturalTPC.withAlterationSemis(alterationsDict[naturalTPC]);
+        ^naturalTPC.alterTPC(alterationsDict[naturalTPC]);
     }
 
-    /* append sharps/flats to tpc equivalent to the specified number of semis (semitones)
-    with positive = sharps, negative = flats */
-    *withAlterationSemis{ |tpc, semis|
-        ^if (semis > 0) {this.withAlterations(tpc, semis, "s")} {this.withAlterations(tpc, semis * -1, "b")};
+    /* Raise or lower (if semis is negative) the semitones of the tpc by adding or removing
+    alterations */
+    *alterTPC{ |tpc, semis|
+        var normalTPC = this.normalize(tpc); 
+        var curFlats = normalTPC.flats;
+        var curSharps = normalTPC.sharps;
+        var finalFlats = 0, finalSharps = 0;
+        if (semis > 0) {
+            finalFlats = curFlats - semis;
+            finalSharps = curSharps + if (finalFlats < 0) {finalFlats * -1} {0};
+            ^if (finalSharps > 0) {
+                normalTPC.natural.appendAlterations(finalSharps, "s")
+            } {
+                normalTPC.natural.appendAlterations(finalFlats, "b")
+            };
+        } {
+            finalSharps = curSharps + semis;
+            finalFlats = curFlats + if (finalSharps < 0) {finalSharps * -1} {0};
+            ^if (finalFlats > 0) {
+                normalTPC.natural.appendAlterations(finalFlats, "b")
+            } {
+                normalTPC.natural.appendAlterations(finalSharps, "s")
+            };
+        };
     }
 
-    *numFlats { |tpc|
+    *flats { |tpc|
         ^this.normalize(tpc).asString.count({ |c, i| (i != 0) && (c == $b) });
     }
 
-    *numSharps { |tpc|
+    *sharps { |tpc|
         ^this.normalize(tpc).asString.count({ |c| (c == $#) || (c == $s) });
     }
 
@@ -71,14 +100,19 @@ TonalPitchClassSymbol {
     }
 
     *semisFromA { |tpc|
-        ^this.naturalSemitones[this.normalize(this.natural(tpc))] + numSharps(tpc) - numFlats(tpc);
+        ^this.naturalSemitones[this.normalize(this.natural(tpc))] + sharps(tpc) - flats(tpc);
     }
 
     /* Returns an integer indicating the offset in semitones from tpc to otherTPC, if
     they were notes in the same octave. This accounts for alterations as well.
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
-    *semitonesTo{ |tpc, otherTPC|
+    *semisTo{ |tpc, otherTPC|
         ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
+    }
+
+    /* Convert TPC to a note symbol by providing an octave */
+    *asNote{ |tpc, octave|
+        ^NoteSymbol.normalize((this.normalize(tpc).asString ++ octave.asString).asSymbol);
     }
 
     /* Returns the alterations of the TPC as a string. Empty string if none. 
@@ -91,14 +125,15 @@ TonalPitchClassSymbol {
 
 + Symbol {
     natural {^TonalPitchClassSymbol.natural(this)}
-    withAlterations { |num, alteration| ^TonalPitchClassSymbol.withAlterations(this, num, alteration)}
-    withAlterationSemis { |semis| ^TonalPitchClassSymbol.withAlterationSemis(this, semis)}
+    appendAlterations { |num, alteration| ^TonalPitchClassSymbol.appendAlterations(this, num, alteration)}
+    alterTPC { |semis| ^TonalPitchClassSymbol.alterTPC(this, semis)}
     withKeyAlterations { |alterationsDict| ^TonalPitchClassSymbol.withKeyAlterations(this, alterationsDict)}
-    numFlats {^TonalPitchClassSymbol.numFlats(this)}
-    numSharps {^TonalPitchClassSymbol.numSharps(this)}
+    flats {^TonalPitchClassSymbol.flats(this)}
+    sharps {^TonalPitchClassSymbol.sharps(this)}
     nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
-    semitonesTo {|otherTPC| ^TonalPitchClassSymbol.semitonesTo(this,otherTPC)}
+    semisTo {|otherTPC| ^TonalPitchClassSymbol.semisTo(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}
     tpcEquals {|otherTPC| ^TonalPitchClassSymbol.normalize(this) == TonalPitchClassSymbol.normalize(otherTPC)}
+    asNote {|octave| ^TonalPitchClassSymbol.asNote(this, octave)}
 }
