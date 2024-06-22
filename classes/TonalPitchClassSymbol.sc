@@ -100,7 +100,7 @@ TonalPitchClassSymbol {
     }
 
     *semisFromA { |tpc|
-        ^this.naturalSemitones[this.normalize(this.natural(tpc))] + sharps(tpc) - flats(tpc);
+        ^this.naturalSemitones[this.normalize(this.natural(tpc))] + this.alterationSemis(tpc);
     }
 
     /* Returns an integer indicating the offset in semitones from tpc to otherTPC, if
@@ -108,6 +108,12 @@ TonalPitchClassSymbol {
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
     *semisTo{ |tpc, otherTPC|
         ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
+    }
+
+    /* Returns the difference in note letter (ignoring accidentals) from
+    otherTPC. For example A.letterStepsTo(C) would be 2 */
+    *letterStepsTo{ |tpc, otherTPC|
+        ^naturals[otherTPC.natural] - naturals[tpc.natural];
     }
 
     /* Convert TPC to a note symbol by providing an octave */
@@ -121,6 +127,13 @@ TonalPitchClassSymbol {
     *alterations{ |tpc|
         ^(if (tpc.asString.size > 1, {tpc.asString[1..]},{""}));
     }
+
+    /* returns the semitone shift caused by the alterations on the tpc,
+    - meaning flats, + meaning sharps */
+    *alterationSemis{ |tpc|
+        ^this.sharps(tpc) - this.flats(tpc);
+    }
+
 }
 
 + Symbol {
@@ -133,7 +146,9 @@ TonalPitchClassSymbol {
     nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
     previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
     semisTo {|otherTPC| ^TonalPitchClassSymbol.semisTo(this,otherTPC)}
+    letterStepsTo {|otherTPC| ^TonalPitchClassSymbol.letterStepsTo(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}
     tpcEquals {|otherTPC| ^TonalPitchClassSymbol.normalize(this) == TonalPitchClassSymbol.normalize(otherTPC)}
     asNote {|octave| ^TonalPitchClassSymbol.asNote(this, octave)}
+    alterationSemis { ^TonalPitchClassSymbol.alterationSemis(this)}
 }
