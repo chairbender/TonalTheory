@@ -45,7 +45,14 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\g.nextNatural(-2) == \e);
         this.assert(\a.nextNatural(-2) == \f);
     }
-    
+ 
+    test_nextOctaveNatural {
+        this.assert(\b.nextOctaveNatural(1) == \c);
+        this.assert(\c.nextOctaveNatural(-1) == \b);
+        this.assert(\b.nextOctaveNatural(8) == \c);
+        this.assert(\c.nextOctaveNatural(-8) == \b);
+    }   
+
     test_semisTo {
         this.assert(\a.semisTo(\a) == 0);
         this.assert(\a.semisTo(\as) == 1);
@@ -57,6 +64,24 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert(\b.semisTo(\a) == -2);
         this.assert(\a.semisTo(\g) == 10);
         this.assert(\g.semisTo(\a) == -10);
+    }
+
+    test_octaveSemisTo {
+        this.assert(\c.octaveSemisTo(\c) == 0);
+        this.assert(\c.octaveSemisTo(\cs) == 1);
+        this.assert(\cs.octaveSemisTo(\c) == -1);
+        this.assert(\c.octaveSemisTo(\db) == 1);
+        this.assert(\db.octaveSemisTo(\c) == -1);
+
+        this.assert(\c.octaveSemisTo(\d) == 2);
+        this.assert(\d.octaveSemisTo(\c) == -2);
+        this.assert(\c.octaveSemisTo(\b) == 11);
+        this.assert(\b.octaveSemisTo(\c) == -11);
+    }
+
+    test_octaveLetterStepsTo {
+        this.assert(\c.octaveLetterStepsTo(\b) == 6);
+        this.assert(\b.octaveLetterStepsTo(\c) == -6);
     }
 
     test_alterations {

@@ -32,4 +32,12 @@ TestNoteSymbol : UnitTest {
         this.assert(\ass4.alterNote(-4) == \abb4);
         this.assert(\abb4.alterNote(4) == \ass4);
     }
+
+
+    test_octavesTo {
+        this.assert(\c4.octavesTo(\c5) == 1);
+        // TODO: this is failing because underlying TPC
+        // logic needs to be fixed first
+        this.assert(\b3.octavesTo(\c4) == 0);
+    }
 }

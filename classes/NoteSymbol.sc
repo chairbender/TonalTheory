@@ -48,7 +48,6 @@ NoteSymbol {
     above note (so negative if otherNote is below). it is considered an octive or more
     based on the actual note name, not the enharmonic pitch. For example, even though
     A3 G##3 is equivalent to A3 A4, it is not counted as an octave. A3 A4 would return 1.
-    TODO: note sure this is correct if octave number changes from b-c not g-a
     */
     *octavesTo { |note, otherNote|
         ^((8 * (otherNote.octave - note.octave)) + 

@@ -6,15 +6,24 @@ unlike with standard pitch classes."
 TonalPitchClassSymbol {
     // map from TPC symbol to integer value (a-g 0-6)
     classvar <naturals;
+    // like above but with C as 0 (as in an acotave)
+    classvar <octaveNaturals;
     // inverse of naturals (int value to natural symbol)
     classvar <naturalsInverted;
+    // like above but with C as 0 (as in an acotave)
+    classvar <octaveNaturalsInverted;
     // number of semitones from a for each natural TPC
     classvar <naturalSemitones;
+    // like above but with C as 0 (as in an acotave)
+    classvar <octaveNaturalSemitones;
 
     *initClass {
         naturals = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6); 
+        octaveNaturals = (c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6); 
         naturalsInverted = naturals.invert;
+        octaveNaturalsInverted = octaveNaturals.invert;
         naturalSemitones = (a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10);
+        octaveNaturalSemitones = (c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11);
     }
 
     *normalize { |tpc|
@@ -89,6 +98,12 @@ TonalPitchClassSymbol {
         ^naturals[natural];
     }
 
+    *octaveNaturalIdx { |tpc|
+        var natural, idx;
+        natural = natural(this.normalize(tpc));
+        ^octaveNaturals[natural];
+    }
+
     /* Returns the 'natural' pitch class that is steps higher
     than the given pitch class. 'Natural' here means without an alteration.
     So, if \Bb is given, the 1st next natural will be \C, the 2n next will be D, etc...
@@ -99,21 +114,41 @@ TonalPitchClassSymbol {
         ^naturalsInverted[(this.naturalIdx(tpc)+steps)%7];
     }
 
+    *nextOctaveNatural { |tpc, steps|
+        ^octaveNaturalsInverted[(this.octaveNaturalIdx(tpc)+steps)%7];
+    }
+
     *semisFromA { |tpc|
         ^this.naturalSemitones[this.normalize(this.natural(tpc))] + this.alterationSemis(tpc);
     }
 
+    *semisFromC { |tpc|
+        ^this.octaveNaturalSemitones[this.normalize(this.natural(tpc))] + this.alterationSemis(tpc);
+    }
+
     /* Returns an integer indicating the offset in semitones from tpc to otherTPC, if
-    they were notes in the same octave. This accounts for alterations as well.
+    they were notes in the same octave (i.e. without crossing
+    octave boundaries). This accounts for alterations as well.
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
     *semisTo{ |tpc, otherTPC|
         ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
     }
 
-    /* Returns the difference in note letter (ignoring accidentals) from
-    otherTPC. For example A.letterStepsTo(C) would be 2 */
+    *octaveSemisTo{ |tpc, otherTPC|
+        ^this.semisFromC(otherTPC) - this.semisFromC(tpc);
+    }
+
     *letterStepsTo{ |tpc, otherTPC|
         ^naturals[otherTPC.natural] - naturals[tpc.natural];
+    }
+
+    /* Returns the difference in note letter (ignoring accidentals) from
+    otherTPC within the octave, without crossing octave boundaries.
+    If other is lower in the octave than tpc, the result will be negative. For example C.letterStepsTo(E) would be 2.
+    TODO: rename to "between"
+    */
+    *octaveLetterStepsTo{ |tpc, otherTPC|
+        ^octaveNaturals[otherTPC.natural] - octaveNaturals[tpc.natural];
     }
 
     /* Convert TPC to a note symbol by providing an octave */
@@ -144,9 +179,11 @@ TonalPitchClassSymbol {
     flats {^TonalPitchClassSymbol.flats(this)}
     sharps {^TonalPitchClassSymbol.sharps(this)}
     nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
-    previousNatural {^TonalPitchClassSymbol.previousNatural(this)}
+    nextOctaveNatural {|steps| ^TonalPitchClassSymbol.nextOctaveNatural(this, steps)}
     semisTo {|otherTPC| ^TonalPitchClassSymbol.semisTo(this,otherTPC)}
+    octaveSemisTo {|otherTPC| ^TonalPitchClassSymbol.octaveSemisTo(this,otherTPC)}
     letterStepsTo {|otherTPC| ^TonalPitchClassSymbol.letterStepsTo(this,otherTPC)}
+    octaveLetterStepsTo {|otherTPC| ^TonalPitchClassSymbol.octaveLetterStepsTo(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}
     tpcEquals {|otherTPC| ^TonalPitchClassSymbol.normalize(this) == TonalPitchClassSymbol.normalize(otherTPC)}
     asNote {|octave| ^TonalPitchClassSymbol.asNote(this, octave)}

@@ -14,6 +14,10 @@ Use the example in this repo (sclang_conf.yaml) to add the include of testsuite.
 # TODOs
 
 - Octaves should start at C, not A
+- WIP
+	- add tests for the new octave-prefixed functions in TPCSymbol
+	- remove the old methods and rename the new ones once everything is transitioned to proper octave-based letters
+- gradually transition everything over to C-based octaves and remove non-C-based ones, and update all test
 - revise tests based on octave at C not A
 	- affects Note / Interval
 - more test coverage for Note / Interval
