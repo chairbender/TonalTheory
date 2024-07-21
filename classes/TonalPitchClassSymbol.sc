@@ -4,26 +4,15 @@ We use the word tonal to describe these pitch classes to indicate that enharmoni
 unlike with standard pitch classes."
 */
 TonalPitchClassSymbol {
-    //TODO: remove / replace non-octave ones after done refactoring
-    // map from TPC symbol to integer value (a-g 0-6)
-    classvar <naturals;
-    // like above but with C as 0 (as in an acotave)
     classvar <octaveNaturals;
     // inverse of naturals (int value to natural symbol)
-    classvar <naturalsInverted;
-    // like above but with C as 0 (as in an acotave)
     classvar <octaveNaturalsInverted;
-    // number of semitones from a for each natural TPC
-    classvar <naturalSemitones;
-    // like above but with C as 0 (as in an acotave)
+    // number of semitones from C for each natural TPC
     classvar <octaveNaturalSemitones;
 
     *initClass {
-        naturals = (a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6); 
         octaveNaturals = (c: 0, d: 1, e: 2, f: 3, g: 4, a: 5, b: 6); 
-        naturalsInverted = naturals.invert;
         octaveNaturalsInverted = octaveNaturals.invert;
-        naturalSemitones = (a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10);
         octaveNaturalSemitones = (c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11);
     }
 
@@ -93,12 +82,6 @@ TonalPitchClassSymbol {
         ^this.normalize(tpc).asString.count({ |c| (c == $#) || (c == $s) });
     }
 
-    *naturalIdx { |tpc|
-        var natural, idx;
-        natural = natural(this.normalize(tpc));
-        ^naturals[natural];
-    }
-
     *octaveNaturalIdx { |tpc|
         var natural, idx;
         natural = natural(this.normalize(tpc));
@@ -129,10 +112,6 @@ TonalPitchClassSymbol {
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
     *semisTo{ |tpc, otherTPC|
         ^this.semisFromC(otherTPC) - this.semisFromC(tpc);
-    }
-
-    *letterStepsTo{ |tpc, otherTPC|
-        ^naturals[otherTPC.natural] - naturals[tpc.natural];
     }
 
     /* Returns the difference in note letter (ignoring accidentals) from
