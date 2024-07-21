@@ -16,8 +16,8 @@ TestNoteSymbol : UnitTest {
         this.assert(\cn1.semis == 0);
         this.assert(\cbn1.semis == -1);
         this.assert(\csn1.semis == 1);
-        this.assert(\bn1.semis == -1);
-        this.assert(\an1.semis == -3);
+        this.assert(\bn1.semis == 11);
+        this.assert(\an1.semis == 9);
         this.assert(\c0.semis == 12);
         this.assert(\css1.semis == 26);
     }
@@ -36,8 +36,12 @@ TestNoteSymbol : UnitTest {
 
     test_octavesTo {
         this.assert(\c4.octavesTo(\c5) == 1);
-        // TODO: this is failing because underlying TPC
-        // logic needs to be fixed first
         this.assert(\b3.octavesTo(\c4) == 0);
+    }
+
+    test_isAbove {
+        this.assert(\b4.isAbove(\c4));
+        this.assert(\a4.isAbove(\c4));
+        this.assert(\b4.isAbove(\a4));
     }
 }

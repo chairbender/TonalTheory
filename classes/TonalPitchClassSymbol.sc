@@ -4,6 +4,7 @@ We use the word tonal to describe these pitch classes to indicate that enharmoni
 unlike with standard pitch classes."
 */
 TonalPitchClassSymbol {
+    //TODO: remove / replace non-octave ones after done refactoring
     // map from TPC symbol to integer value (a-g 0-6)
     classvar <naturals;
     // like above but with C as 0 (as in an acotave)
@@ -111,10 +112,6 @@ TonalPitchClassSymbol {
     Steps may be negative, to move steps DOWN from the given TPC.
     */
     *nextNatural { |tpc, steps|
-        ^naturalsInverted[(this.naturalIdx(tpc)+steps)%7];
-    }
-
-    *nextOctaveNatural { |tpc, steps|
         ^octaveNaturalsInverted[(this.octaveNaturalIdx(tpc)+steps)%7];
     }
 
@@ -131,10 +128,6 @@ TonalPitchClassSymbol {
     octave boundaries). This accounts for alterations as well.
     The sign of the result will be negative if otherTPC is below tpc, otherwise positive*/
     *semisTo{ |tpc, otherTPC|
-        ^this.semisFromA(otherTPC) - this.semisFromA(tpc);
-    }
-
-    *octaveSemisTo{ |tpc, otherTPC|
         ^this.semisFromC(otherTPC) - this.semisFromC(tpc);
     }
 
@@ -144,10 +137,11 @@ TonalPitchClassSymbol {
 
     /* Returns the difference in note letter (ignoring accidentals) from
     otherTPC within the octave, without crossing octave boundaries.
-    If other is lower in the octave than tpc, the result will be negative. For example C.letterStepsTo(E) would be 2.
-    TODO: rename to "between"
+    If other is lower in the octave than tpc, the result will be negative.
+    Otherwise it will be positive.
+    For example C.letterStepsTo(E) would be 2.
     */
-    *octaveLetterStepsTo{ |tpc, otherTPC|
+    *letterStepsBetween{ |tpc, otherTPC|
         ^octaveNaturals[otherTPC.natural] - octaveNaturals[tpc.natural];
     }
 
@@ -168,7 +162,6 @@ TonalPitchClassSymbol {
     *alterationSemis{ |tpc|
         ^this.sharps(tpc) - this.flats(tpc);
     }
-
 }
 
 + Symbol {
@@ -179,11 +172,8 @@ TonalPitchClassSymbol {
     flats {^TonalPitchClassSymbol.flats(this)}
     sharps {^TonalPitchClassSymbol.sharps(this)}
     nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
-    nextOctaveNatural {|steps| ^TonalPitchClassSymbol.nextOctaveNatural(this, steps)}
     semisTo {|otherTPC| ^TonalPitchClassSymbol.semisTo(this,otherTPC)}
-    octaveSemisTo {|otherTPC| ^TonalPitchClassSymbol.octaveSemisTo(this,otherTPC)}
-    letterStepsTo {|otherTPC| ^TonalPitchClassSymbol.letterStepsTo(this,otherTPC)}
-    octaveLetterStepsTo {|otherTPC| ^TonalPitchClassSymbol.octaveLetterStepsTo(this,otherTPC)}
+    letterStepsBetween {|otherTPC| ^TonalPitchClassSymbol.letterStepsBetween(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}
     tpcEquals {|otherTPC| ^TonalPitchClassSymbol.normalize(this) == TonalPitchClassSymbol.normalize(otherTPC)}
     asNote {|octave| ^TonalPitchClassSymbol.asNote(this, octave)}
