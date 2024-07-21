@@ -5,6 +5,9 @@ There can be any number of a's or d's to indicate things like doubly
 or triply augmented/diminished intervals (but not in combination
 with m, P, M, or combining a + d). number is any integer
 greater than or equal to 1.
+
+The term "line of fifths" comes up a lot. This link has 
+a more detailed explanation as to what this is: https://music.stackexchange.com/a/17365/10617
 */
 IntervalSymbol {
     classvar <lineOfFifthsNumbers;
@@ -80,7 +83,7 @@ IntervalSymbol {
     }
 
     /*
-    letter index is for the line of fifths wtih 0 as F and repeating
+    letter index for the line of fifths wtih 0 as F and repeating
     as index increases (C G D A E B F C ... and for negative numbers as well). This gives the
     new letter index given a starting tpc and an offset integer.
     For example, if TPC is C and offset is 2, the result is 3."*/
@@ -103,7 +106,12 @@ IntervalSymbol {
     /*Returns the index of tpc on the line of fifths
     centered at centerTPC
     The index is defined to be 0 at the center and increasingly positive as
-    sharps are added, increasingly negative as flats are added
+    sharps are added, increasingly negative as flats are added.
+    So for example, the line of fifths centered at F looks like
+    (and note the pattern continues in each direction, adding more
+    sharps and flats after each loop through the letters):
+    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
+    Fb Cb Gb Db A  E   B F C G D A# E# B# F#
     */
     *lineOfFifthsTPCIndex{ |centerTPC, tpc|
         ^this.lineOfFifthsStepsTo(centerTPC, tpc) + ((tpc.alterationSemis - centerTPC.alterationSemis) * 7);
@@ -111,8 +119,17 @@ IntervalSymbol {
 
     /*Return the alteration semitones of the tonal pitch class that exists at the given index
     in the line of fifths centered at tonal-pitch-class, as a number of semitones up (positive, i.e. sharps)
-    or down (negative, i.e. flats)*/
+    or down (negative, i.e. flats).
+    Another way of putting it is this walks on the line of fifths
+    centered at tpc, <index> steps, and returns the alterations.
+    For example, the LOF centered at F looks like this:
+    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
+    Fb Cb Gb Db A  E   B F C G D A# E# B# F#
+    So tpc=F, index = 3 returns 0 (there is no alteration on "D").
+    But tpc=F, index 4 would return 1, and -4 would return -1 (corresponding to the A# / Db on the above line at index 4 / -4 
+    */
     *lineOfFifthsAlterationSemis{ |tpc, index|
+        // how far
         var letterOffset = this.lineOfFifthsLetterIndex(tpc, index);
         var letterShift = if (letterOffset >= 0) {letterOffset} {letterOffset - 6};
         var letterSemis = letterShift.div(7);
