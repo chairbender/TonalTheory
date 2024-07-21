@@ -1,1 +1,4 @@
-// TODO: figure out how to run tests again
+s.boot;
+
+// run individual test classes like this
+TestNoteSymbol.run;
