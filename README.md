@@ -11,7 +11,13 @@ to locate include paths.
 
 Use the example in this repo (sclang_conf.yaml) to add the include of testsuite.
 
+Requires quarks:
+	- Quarks.install("https://github.com/smoge/Rational")
+
 # TODOs
 
-- Octaves should start at C, not A
-	- Update Interval
+- Continue with more of porting
+	- line note
+	- line
+	- linear operations
+- declare rational number quark dependency properly
