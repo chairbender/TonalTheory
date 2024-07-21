@@ -14,7 +14,7 @@ else
   set shortmess=aoO
 endif
 badd +1 README.md
-badd +111 ~/TonalTheory/classes/IntervalSymbol.sc
+badd +154 ~/TonalTheory/classes/IntervalSymbol.sc
 badd +52 ~/TonalTheory/classes/TestIntervalSymbol.sc
 badd +4 ~/TonalTheory/scratch.scd
 badd +0 \[scnvim]
@@ -75,12 +75,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 132 - ((18 * winheight(0) + 18) / 36)
+let s:l = 154 - ((22 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 132
-normal! 018|
+keepjumps 154
+normal! 041|
 wincmd w
 argglobal
 if bufexists(fnamemodify("~/TonalTheory/classes/TestIntervalSymbol.sc", ":p")) | buffer ~/TonalTheory/classes/TestIntervalSymbol.sc | else | edit ~/TonalTheory/classes/TestIntervalSymbol.sc | endif
@@ -98,13 +98,14 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 58 - ((20 * winheight(0) + 18) / 36)
+let s:l = 64 - ((20 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 58
-normal! 068|
+keepjumps 64
+normal! 052|
 wincmd w
+2wincmd w
 exe 'vert 1resize ' . ((&columns * 78 + 78) / 157)
 exe 'vert 2resize ' . ((&columns * 78 + 78) / 157)
 tabnext
@@ -177,7 +178,6 @@ if filereadable(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
 set hlsearch
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

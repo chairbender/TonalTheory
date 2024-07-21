@@ -31,9 +31,11 @@ TestIntervalSymbol : UnitTest {
 
     test_lineOfFifthsLetter {
         this.assert(IntervalSymbol.lineOfFifthsLetter(\f, 0) == \f);
+        this.assert(IntervalSymbol.lineOfFifthsLetter(\f, -1) == \b);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\f, 6) == \b);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\f, 7) == \f);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, 0) == \c);
+        this.assert(IntervalSymbol.lineOfFifthsLetter(\c, -1) == \f);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, 6) == \f);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, 7) == \c);
     }
@@ -58,6 +60,8 @@ TestIntervalSymbol : UnitTest {
         this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, 4) == 1);
         this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, -4) == -1);
     }
+
+    // TODO: left off - add test for lineOfFifthsTpc
 
     test_compoundIntervalBetween {
         this.assert(\a4.compoundIntervalTo(\b4) == \M2);

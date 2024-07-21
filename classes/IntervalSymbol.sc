@@ -14,7 +14,12 @@ IntervalSymbol {
     classvar <lineOfFifthsLetters;
 
     *initClass {
+        // pattern of numbers that repeat in the line of fifths
+        // intervals, with the 0th index of this list starting
+        // on the center of the LOF
         lineOfFifthsNumbers = [1, 5, 2, 6, 3, 7, 4];
+        // line of fifths letter orders, for the line of fifths centered on \d. To center
+        // it on a different letter, we'd rotate it forwards or backwards.
         lineOfFifthsLetters = [\f, \c, \g, \d, \a, \e, \b];
     }
 
@@ -42,7 +47,8 @@ IntervalSymbol {
             };
         });
     }
-    /*Given an index, returns the quality abbreviation
+
+    /*Given an index into the line of fifths, returns the quality abbreviation
     (m for minor, d for diminished, P for perfect, M for major, a for augmented,
     dd for doubly diminished, aa for doubly augmented and so on) as a string,
     for the interval name that would be on the line of fifths at that point
@@ -62,7 +68,7 @@ IntervalSymbol {
         }
     }
 
-    /*Given an index, returns the number of the interval at that point, (with 1 being unison)
+    /*Given an index into the line of fifths, returns the number of the interval at that point, (with 1 being unison)
     0 is defined to be 1, and the pattern as one goes lower than 1 is 4, 7, 3, 6, 2, 5, U (repeats).
     As the index increases, the pattern is 5, 2, 6, 3, 7, 4, 1 (repeats).
     */
@@ -83,18 +89,11 @@ IntervalSymbol {
     }
 
     /*
-    letter index for the line of fifths wtih 0 as F and repeating
-    as index increases (C G D A E B F C ... and for negative numbers as well). This gives the
-    new letter index given a starting tpc and an offset integer.
-    For example, if TPC is C and offset is 2, the result is 3."*/
-    *lineOfFifthsLetterIndex { |tpc, offset|
-        ^lineOfFifthsLetters.indexOf(tpc.natural) + offset;
-    }
-
-    /*Return the letter of the tonal pitch class that exists at the given index
-    in the line of fifths centered at tonal-pitch-class, as a string*/
-    *lineOfFifthsLetter { |tpc, idx|
-        ^lineOfFifthsLetters[this.lineOfFifthsLetterIndex(tpc, idx) % 7];
+    Starting on the (natural) letter 'tpc' in the line of fifths and walking 'offset' steps, return the letter we arrive at.
+    */
+    *lineOfFifthsLetter { |tpc, offset|
+        var finalIdx = lineOfFifthsLetters.indexOf(tpc.natural) + offset;
+        ^lineOfFifthsLetters[finalIdx % 7];
     }
 
     /*The difference in index between the letter names of the given TPCs
@@ -118,22 +117,34 @@ IntervalSymbol {
     }
 
     /*Return the alteration semitones of the tonal pitch class that exists at the given index
-    in the line of fifths centered at tonal-pitch-class, as a number of semitones up (positive, i.e. sharps)
+    in the line of fifths centered on tpc, as a number of semitones up (positive, i.e. sharps)
     or down (negative, i.e. flats).
     Another way of putting it is this walks on the line of fifths
-    centered at tpc, <index> steps, and returns the alterations.
-    For example, the LOF centered at F looks like this:
+    <index> steps, and returns the alterations, added to the alterations of TPC
+    For example, the LOF centered at F looks like this 
+    (note the actual center pitch class LETTER doesn't matter for this function as the pattern of alterations doesn't depend on the center letter, though it DOES depend on the ALTERATIONS of the center TPC):
     -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
     Fb Cb Gb Db A  E   B F C G D A# E# B# F#
-    So tpc=F, index = 3 returns 0 (there is no alteration on "D").
-    But tpc=F, index 4 would return 1, and -4 would return -1 (corresponding to the A# / Db on the above line at index 4 / -4 
+    So index = 3 returns 0 (there is no alteration on "D").
+    But index 4 would return 1, and -4 would return -1 (corresponding to the A# / Db on the above line at index 4 / -4 .
+
+    Now a more complicated example. What if the center TPC has alterations in it already? For example, let's say the center is F#. Then
+    the LOF looks like this:
+    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
+    F C G D A#  E#   B# F# C# G# D# A## E## B## F##
+    So index 3 returns 1, index 4 / -4 returns 2, 0.
+    Basically, the alterations are just added to the alterations
+    of the center TPC.
     */
     *lineOfFifthsAlterationSemis{ |tpc, index|
-        // how far
-        var letterOffset = this.lineOfFifthsLetterIndex(tpc, index);
-        var letterShift = if (letterOffset >= 0) {letterOffset} {letterOffset - 6};
-        var letterSemis = letterShift.div(7);
-        ^letterSemis + tpc.alterationSemis;
+        // -3 to +3 are the "0 alterations" range. So let's say -3 is the "start"
+        // and modulo from there
+        var adjustedIdx = index + 3;
+        // now how many times are we looping through the letters
+        // in either direction? That gives us the
+        // number of alterations to add / subtract from the center tpc
+        var loops = adjustedIdx.div(7);
+        ^(loops + tpc.alterationSemis);
     }
 
     /* get the tonal pitch class at the given index
