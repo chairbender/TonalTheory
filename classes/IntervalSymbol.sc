@@ -148,10 +148,14 @@ IntervalSymbol {
     }
 
     /* get the tonal pitch class at the given index
-    for the line of fifths centered on centerTPC
+    for the line of fifths centered on tpc
+    For example, the line of fifths centered on F looks like
+    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
+    Fb Cb Gb Db A  E   B F C G D A# E# B# F#
+    So tpc=F, index 4 gives A#
     */
-    *lineOfFifthsTPC { |centerTPC, index|
-        ^this.lineOfFifthsLetter(centerTPC, index).alterTPC(this.lineOfFifthsAlterationSemis(centerTPC, index));
+    *lineOfFifthsTPC { |tpc, index|
+        ^this.lineOfFifthsLetter(tpc, index).alterTPC(this.lineOfFifthsAlterationSemis(tpc, index));
     }
 
     /* return the quality of the provided interval symbol, as a string */
@@ -209,10 +213,11 @@ IntervalSymbol {
         var higherNote = if (note.isAbove(otherNote)) {note} {otherNote};
         var lowerNote = if (note.isAbove(otherNote)) {otherNote} {note};
         var octaves = lowerNote.octavesTo(higherNote);
-        var tpcIdx = this.lineOfFifthsTPCIndex(note.tpc, otherNote.tpc);
+        var tpcIdx = this.lineOfFifthsTPCIndex(lowerNote.tpc, higherNote.tpc);
         var baseInterval = this.lineOfFifthsInterval(tpcIdx);
         var finalQuality = baseInterval.quality;
         var finalNumber = (7 * octaves) + baseInterval.intervalNumber;
+
         ^(finalQuality ++ finalNumber).asSymbol;
     }
 
@@ -301,4 +306,5 @@ IntervalSymbol {
     lineOfFifthsStepsTo { |otherInterval| ^IntervalSymbol.lineOfFifthsStepsTo(this, otherInterval) }
     quality { ^IntervalSymbol.quality(this) }
     intervalNumber { ^IntervalSymbol.intervalNumber(this) }
+    simpleInterval { ^IntervalSymbol.simpleInterval(this) }
 }

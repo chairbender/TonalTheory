@@ -1,7 +1,8 @@
 s.boot;
 
 // run individual test classes like this
+TestNoteSymbol.run;
 TestIntervalSymbol.run;
 
 // scratchpad
-\c.octaveLetterStepsTo(\b);
+\a4.compoundIntervalTo(\c4);

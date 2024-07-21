@@ -61,6 +61,7 @@ NoteSymbol {
     */
     *isAbove { |note, otherNote|
         if (note.octave > otherNote.octave) {^true};
+        if (note.octave < otherNote.octave) {^false};
         ^note.tpc.letterStepsBetween(otherNote.tpc) < 0;
     }
 }

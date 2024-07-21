@@ -43,5 +43,8 @@ TestNoteSymbol : UnitTest {
         this.assert(\b4.isAbove(\c4));
         this.assert(\a4.isAbove(\c4));
         this.assert(\b4.isAbove(\a4));
+
+        this.assert(\a3.isAbove(\c4).not);
+        this.assert(\a3.isAbove(\cs4).not);
     }
 }
