@@ -106,4 +106,8 @@ TestIntervalSymbol : UnitTest {
     test_simpleIntervalBetween {
         this.assert(\g3.simpleIntervalTo(\a4) == \M2);
     }
+
+    test_noteAbove {
+        this.assert(\
+    }
 }

@@ -261,7 +261,7 @@ IntervalSymbol {
     }
 
     /* Returns the TPC indicating the center of the line-of-fifths given
-    an interval name and tonal-pitch-class the interval should have in that line of fifths
+    an interval name and tpc the interval should have in that line of fifths
     */
     *lineOfFifthsCenter { |interval, tpc|
         var intervalIdx = this.lineOfFifthsIntervalIndex(interval);
@@ -307,4 +307,7 @@ IntervalSymbol {
     quality { ^IntervalSymbol.quality(this) }
     intervalNumber { ^IntervalSymbol.intervalNumber(this) }
     simpleInterval { ^IntervalSymbol.simpleInterval(this) }
+    noteAbove { |note| ^IntervalSymbol.noteAbove(this, note) }
+    noteBelow { |note| ^IntervalSymbol.noteBelow(this, note) }
+    isConsonant { |isLowestSoundingNote| ^IntervalSymbol.isConsonant(this, isLowestSoundingNote) }
 }

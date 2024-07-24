@@ -13,16 +13,14 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +16 README.md
-badd +3 ~/TonalTheory/classes/IntervalSymbol.sc
-badd +8 ~/TonalTheory/scratch.scd
-badd +118 ../overtone-music-theory/src/music_theory/westergaardian_theory/line.clj
-badd +13 ~/TonalTheory/classes/LineNote.sc
-badd +0 \[scnvim]
-badd +1 ~/TonalTheory/classes/TestLineNote.sc
-badd +1 ~/TonalTheory/classes/TestNoteSymbol.sc
-badd +9 ~/TonalTheory/classes/Line.sc
-badd +1 ~/TonalTheory/classes/TestLine.sc
+badd +21 README.md
+badd +6 ~/TonalTheory/scratch.scd
+badd +57 \[scnvim]
+badd +58 ~/TonalTheory/classes/TTLine.sc
+badd +30 ~/TonalTheory/classes/TestTTLine.sc
+badd +134 classes/TonalPitchClassSymbol.sc
+badd +1 classes/TestIntervalSymbol.sc
+badd +312 ~/TonalTheory/classes/IntervalSymbol.sc
 argglobal
 %argdel
 $argadd README.md
@@ -47,9 +45,9 @@ if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 19
-normal! 031|
+normal! 047|
 tabnext
-edit ~/TonalTheory/classes/Line.sc
+edit ~/TonalTheory/classes/IntervalSymbol.sc
 let s:save_splitbelow = &splitbelow
 let s:save_splitright = &splitright
 set splitbelow splitright
@@ -69,7 +67,7 @@ set winwidth=1
 exe 'vert 1resize ' . ((&columns * 78 + 78) / 157)
 exe 'vert 2resize ' . ((&columns * 78 + 78) / 157)
 argglobal
-balt ~/TonalTheory/classes/LineNote.sc
+balt ~/TonalTheory/classes/TTLine.sc
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -80,19 +78,19 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 16 - ((15 * winheight(0) + 18) / 36)
+let s:l = 312 - ((25 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 16
-normal! 0
+keepjumps 312
+normal! 027|
 wincmd w
 argglobal
-if bufexists(fnamemodify("~/TonalTheory/classes/TestLine.sc", ":p")) | buffer ~/TonalTheory/classes/TestLine.sc | else | edit ~/TonalTheory/classes/TestLine.sc | endif
+if bufexists(fnamemodify("classes/TestIntervalSymbol.sc", ":p")) | buffer classes/TestIntervalSymbol.sc | else | edit classes/TestIntervalSymbol.sc | endif
 if &buftype ==# 'terminal'
-  silent file ~/TonalTheory/classes/TestLine.sc
+  silent file classes/TestIntervalSymbol.sc
 endif
-balt ~/TonalTheory/classes/Line.sc
+balt ~/TonalTheory/classes/TestTTLine.sc
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -103,12 +101,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 18) / 36)
+let s:l = 111 - ((33 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-normal! 0
+keepjumps 111
+normal! 021|
 wincmd w
 exe 'vert 1resize ' . ((&columns * 78 + 78) / 157)
 exe 'vert 2resize ' . ((&columns * 78 + 78) / 157)
@@ -143,12 +141,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 5 - ((4 * winheight(0) + 18) / 36)
+let s:l = 6 - ((5 * winheight(0) + 18) / 36)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 5
-normal! 0
+keepjumps 6
+normal! 08|
 wincmd w
 argglobal
 enew
