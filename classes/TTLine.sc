@@ -1,6 +1,7 @@
 
 /*
-A line is a sequence of line notes. Chords / intervals
+A line (TT short for TonalTheory as Line exists
+already in SC) is a sequence of line notes. Chords / intervals
 are only produced by simlatenously-sounding lines and are
 not present in an individual line.
 This class provides the general Line object as well as
@@ -10,12 +11,16 @@ Why not just have Line extend List so we
 could easily do all the many operations SC allows?
 Because there are operations on List that would break the invariants of what a Line is. Instead, Line encapsulates and tries to maintain those invariants.
 */
-Line {
+TTLine {
     // List of LineNote
     var <lineNotes;
 
     *new { |lineNotes|
         ^super.newCopyArgs(lineNotes);
+    }
+
+    at { |i|
+        ^lineNotes[i];
     }
 
     /*
@@ -29,7 +34,7 @@ Line {
         var targetNote = lineNotes[index];
         var lastDuration = targetNote.duration - firstDuration;
         lineNotes[index] = LineNote(targetNote.note, firstDuration);
-        lineNotes.insert(LineNote(targetNote.note, lastDuration));
+        lineNotes.insert(index + 1, LineNote(targetNote.note, lastDuration));
     }
 
 }

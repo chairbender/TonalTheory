@@ -3,11 +3,11 @@ s.boot;
 Quarks.install("https://github.com/smoge/Rational")
 
 // run individual test classes like this
-TestLineNote.run;
+TestTTLine.run;
 
 // scratchpad
-\a4.compoundIntervalTo(\c4);
-
-1.asFraction(100);
-
-1 %/ 4
+var list = TTLine(List[LineNote(\a4, 1)]);
+var list2 = TTLine(List[LineNote(\a4, 1)]);
+list[0];
+list.class == list2.class;
+list == list2;
