@@ -62,4 +62,49 @@ TTLine {
         lineNotes[articulationIndex + 1].note = neighborNote;
     }
 
+    /*
+    Given an index into the line, and a note forming a consonant interval
+    with the note at that index (westergaardian theory consonance), returns a new line with
+    an arpeggiation performed at that index using the given note.
+    In an arpeggiation, the arpeggiated note is rearticulated (with
+    firstDuration as the duration of the first note of the rearticulation), and then the second note of the rearticulateion is set to 'arpeggiateNote'. 
+    So all of the same requirements of rearticulation also apply to
+    this method.
+    'up' indicates whether the arpeggiation should go from low
+    note to high note or vice versa. 'firstDuration' must be less than the duration of the note
+    at the given index in the line. 'arpeggiateNote' must form a westergaardian theory consonant interval with the note being arpeggiated.
+    (see the isConsonant method of IntervalSymbol).
+    Note that whether the note is consonant depends on whether it is 
+    the lowest sounding note (if multiple lines are sounding). 
+    As this method has no idea what other lines are sounding, it
+    will accept values which are consonant regardless of being the 
+    lowest sounding note.
+    */
+    arpeggiateNote { |index, arpeggiateNote, firstDuration, up|
+        var targetNote = lineNotes[index];
+        var arpeggiateInterval = targetNote.note.compoundIntervalTo(arpeggiateNote);
+        var lowNote = if (arpeggiateNote.isAbove(targetNote.note), { targetNote.note }, { arpeggiateNote });
+        var highNote = if (arpeggiateNote.isAbove(targetNote.note), { arpeggiateNote }, { targetNote.note });
+        var finalFirstNote = if (up, { lowNote }, { highNote });
+        var finalLastNote = if (up, { highNote }, { lowNote });
+        if (!arpeggiateInterval.isConsonant(true) && !arpeggiateInterval.isConsonant(false)) {
+            Error("interval between targeted note " ++ targetNote.note ++ " and arpeggiateNote " ++ arpeggiateNote ++ " is " ++ arpeggiateInterval ++ " which is not consonant");
+        };
+        this.rearticulate(index, firstDuration);
+        lineNotes[index].note = finalFirstNote;
+        lineNotes[index + 1].note = finalLastNote;
+    }
+
+    /*
+    Like arpeggiateNote, but the interval is specified rather than
+    the note of the arpeggiation. The interval is applied to the note
+    at the target index to determine the arppegiateNote. When 'up' is true the interval will be up.
+    */
+    arpeggiateInterval{ |index, interval, firstDuration, up|
+        var targetNote = lineNotes[index];
+        var arpeggiateNote = if (up, {targetNote.note.intervalAbove(interval)}, {targetNote.note.intervalBelow(interval)});
+        this.arpeggiateNote(index, arpeggiateNote, firstDuration, up);
+        // TODO: LEFT OFF - need to add tests for this and above method
+    }
+
 }
