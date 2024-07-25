@@ -76,4 +76,6 @@ NoteSymbol {
     alterNote { |semis| ^NoteSymbol.alterNote(this, semis) }
     compoundIntervalTo { |otherNote| ^IntervalSymbol.compoundIntervalBetween(this,otherNote) }
     simpleIntervalTo { |otherNote| ^IntervalSymbol.simpleIntervalBetween(this,otherNote) }
+    intervalAbove { |interval| ^IntervalSymbol.noteAbove(interval,this) }
+    intervalBelow { |interval| ^IntervalSymbol.noteBelow(interval,this) }
 }

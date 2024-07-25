@@ -108,6 +108,14 @@ TestIntervalSymbol : UnitTest {
     }
 
     test_noteAbove {
-        this.assert(\
+        this.assert(\M2.noteAbove(\a4) == \b4);
+        this.assert(\m3.noteAbove(\a4) == \c5);
+        this.assert(\P8.noteAbove(\a3) == \a4);
+        this.assert(\P1.noteAbove(\a3) == \a3);
+        this.assert(\M10.noteAbove(\a3) == \cs5);
+        this.assert(\dd2.noteAbove(\es4) == \fbb4);
+        this.assert(\M2.noteAbove(\g3) == \a3);
+        this.assert(\d8.noteAbove(\cs4) == \c5);
+        this.assert(\a8.noteAbove(\c4) == \cs5);
     }
 }

@@ -234,7 +234,7 @@ IntervalSymbol {
     number to be mod 7 (i.e. brings the interval to within an octave)
     */
     *lineOfFifthsIntervalIndex { |interval|
-        var intervalNumber = interval.number;
+        var intervalNumber = interval.intervalNumber;
         var adjustedIntervalNumber = if (intervalNumber >= 8) {
             ((intervalNumber - 1) % 7) + 1;
         } {intervalNumber};
@@ -248,13 +248,13 @@ IntervalSymbol {
         if (qualityStr == "M") {
             ^([2, 6, 3, 7].indexOf(adjustedIntervalNumber) + 2)
         };
-        if (qualityStr.includes("d")) {
+        if (qualityStr.includes($d)) {
             var occurrences = qualityStr.count({|c| c == $d});
             var simpleNum = -1 * [5, 1, 4, 7, 3, 6, 2].indexOf(adjustedIntervalNumber);
             ^(occurrences * -7) + simpleNum + 1;
         };
-        if (qualityStr.includes("a")) {
-            var occurrences = qualityStr.count({|c| c == $d});
+        if (qualityStr.includes($a)) {
+            var occurrences = qualityStr.count({|c| c == $a});
             var simpleNum = [4, 1, 5, 2, 6, 3, 7].indexOf(adjustedIntervalNumber);
             ^(occurrences * 7) + simpleNum - 1;
         };
@@ -275,7 +275,7 @@ IntervalSymbol {
         var octaves = interval.intervalNumber.div(8);
         var intervalIdx = this.lineOfFifthsIntervalIndex(interval);
         var nextTPC = this.lineOfFifthsTPC(note.tpc, intervalIdx);
-        var octaveAdjust = if (note.tpc.letterStepsTo(nextTPC) < 0) {1} {0};
+        var octaveAdjust = if (note.tpc.letterStepsBetween(nextTPC) < 0) {1} {0};
         var finalOctaves = note.octave + octaves + octaveAdjust;
         ^nextTPC.asNote(finalOctaves);
     }
@@ -286,7 +286,7 @@ IntervalSymbol {
     *noteBelow { |interval, note|
         var octaves = interval.intervalNumber.div(8);
         var bottomTPC = this.lineOfFifthsCenter(interval, note.tpc);
-        var octaveAdjust = if (bottomTPC.letterStepsTo(note.tpc) < 0) {1} {0};
+        var octaveAdjust = if (bottomTPC.letterStepsBetween(note.tpc) < 0) {1} {0};
         var finalOctaves = note.octave - (octaves + octaveAdjust);
         ^bottomTPC.asNote(finalOctaves);
     }
