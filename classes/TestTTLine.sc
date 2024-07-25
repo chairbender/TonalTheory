@@ -42,4 +42,34 @@ TestTTLine : UnitTest {
         this.assert(line[3].duration == 1);
     }
 
+    test_neighbor_minimalUp {
+        var line = TTLine(List[ 
+            LineNote(\a4, 1),
+            LineNote(\a4, 1)
+        ]);
+        line.neighbor(0, 1 %/ 2, true, \M2);
+
+        this.assert(line[0].note == \a4);
+        this.assert(line[0].duration == (1 %/ 2));
+        this.assert(line[1].note == \b4);
+        this.assert(line[1].duration == (1 %/ 2));
+        this.assert(line[2].note == \a4);
+        this.assert(line[2].duration == 1);
+    }
+
+    test_neighbor_minimalDown {
+        var line = TTLine(List[ 
+            LineNote(\a4, 1),
+            LineNote(\a4, 1)
+        ]);
+        line.neighbor(0, 1 %/ 2, false, \M2);
+
+        this.assert(line[0].note == \a4);
+        this.assert(line[0].duration == (1 %/ 2));
+        this.assert(line[1].note == \g4);
+        this.assert(line[1].duration == (1 %/ 2));
+        this.assert(line[2].note == \a4);
+        this.assert(line[2].duration == 1);
+    }
+
 }

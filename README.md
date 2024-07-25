@@ -16,9 +16,6 @@ Requires quarks:
 
 # TODOs
 
-- missed porting some things from note / interval
-	- interval idx
-	- interval above / below (depends on above)
 - Continue with more of porting
 	- line note
 	- line

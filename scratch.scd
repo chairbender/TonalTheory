@@ -7,4 +7,4 @@ TestTTLine.run;
 TestIntervalSymbol.run;
 
 // scratchpad
-\d2.noteAbove(\es4)
+\M2.noteBelow(\a4)

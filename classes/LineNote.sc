@@ -12,9 +12,9 @@ for common note durations like quarter, whole, etc...
 */
 LineNote {
     // as a Note symbol i.e. \a4
-    var <note;
+    var <>note;
     // as a Rational fraction i.e. 1 %/ 4
-    var <duration;
+    var <>duration;
 
     *new { |note, duration|
         ^super.newCopyArgs(note, duration);
