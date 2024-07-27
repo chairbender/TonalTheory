@@ -150,7 +150,7 @@ TonalPitchClassSymbol {
     withKeyAlterations { |alterationsDict| ^TonalPitchClassSymbol.withKeyAlterations(this, alterationsDict)}
     flats {^TonalPitchClassSymbol.flats(this)}
     sharps {^TonalPitchClassSymbol.sharps(this)}
-    nextNatural {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
+    nextNaturalTPC {|steps| ^TonalPitchClassSymbol.nextNatural(this, steps)}
     semisTo {|otherTPC| ^TonalPitchClassSymbol.semisTo(this,otherTPC)}
     letterStepsBetween {|otherTPC| ^TonalPitchClassSymbol.letterStepsBetween(this,otherTPC)}
     alterations {^TonalPitchClassSymbol.alterations(this)}

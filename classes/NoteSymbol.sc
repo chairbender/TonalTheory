@@ -64,12 +64,37 @@ NoteSymbol {
         if (note.octave < otherNote.octave) {^false};
         ^note.tpc.letterStepsBetween(otherNote.tpc) < 0;
     }
+
+    /* Returns the 'natural' note that is steps higher
+    than the given pitch class. Handles octave crossings as well. 
+    'Natural' here means without an alteration.
+    So, if \Bb4 is given, the 1st next natural will be \C5, the 2n next will be D5, etc...
+    If \Bs4 is given, the next natural will be \C5.
+    Steps may be negative, to move steps DOWN from the given TPC.
+    */
+    *nextNatural { |note, steps|
+        // how many octaves are we crossing (ignoring octave shift from the starting
+        // octave)
+        var down = steps < 0;
+        var sign = if (down) { -1 } { 1 };
+        var octaveShift = (steps.abs.div(7)) * sign;
+        var stepsShift = (steps.abs % 7) * sign;
+        var finalNaturalTPC = note.tpc.nextNaturalTPC(stepsShift);
+        // do we cross C?
+        var startOctaveIdx = TonalPitchClassSymbol.octaveNaturals[note.tpc.natural];
+        var endOctaveIdx = TonalPitchClassSymbol.octaveNaturals[finalNaturalTPC];
+        var crossC = if (down) { startOctaveIdx < endOctaveIdx } { startOctaveIdx > endOctaveIdx };
+        octaveShift.postln;
+        octaveShift = if (crossC) { octaveShift + sign } { octaveShift };
+        ^(finalNaturalTPC.asNote(note.octave + octaveShift));
+    }
 }
 
 + Symbol {
     noteEquals{ |otherNote| ^NoteSymbol.normalize(this) == NoteSymbol.normalize(otherNote) }
     isAbove{ |otherNote| ^NoteSymbol.isAbove(this, otherNote) }
     octavesTo{ |otherNote| ^NoteSymbol.octavesTo(this, otherNote) }
+    nextNaturalNote { |steps| ^NoteSymbol.nextNatural(this, steps) }
     tpc { ^NoteSymbol.tpc(this) }
     octave { ^NoteSymbol.octave(this) }
     semis { ^NoteSymbol.semis(this) }

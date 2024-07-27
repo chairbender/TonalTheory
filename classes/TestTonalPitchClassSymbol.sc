@@ -32,11 +32,11 @@ TestTonalPitchClassSymbol : UnitTest {
         this.assert('a##'.sharps == 2);
     }
  
-    test_nextNatural {
-        this.assert(\b.nextNatural(1) == \c);
-        this.assert(\c.nextNatural(-1) == \b);
-        this.assert(\b.nextNatural(8) == \c);
-        this.assert(\c.nextNatural(-8) == \b);
+    test_nextNaturalTPC {
+        this.assert(\b.nextNaturalTPC(1) == \c);
+        this.assert(\c.nextNaturalTPC(-1) == \b);
+        this.assert(\b.nextNaturalTPC(8) == \c);
+        this.assert(\c.nextNaturalTPC(-8) == \b);
     }   
 
     test_SemisTo {

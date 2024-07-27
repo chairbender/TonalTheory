@@ -47,4 +47,14 @@ TestNoteSymbol : UnitTest {
         this.assert(\a3.isAbove(\c4).not);
         this.assert(\a3.isAbove(\cs4).not);
     }
+
+    test_nextNaturalNote {
+        this.assert(\c4.nextNaturalNote(1) == \d4);
+        this.assert(\c4.nextNaturalNote(-1) == \b3);
+        this.assert(\d4.nextNaturalNote(-7) == \d3);
+        this.assert(\d4.nextNaturalNote(-8) == \c3);
+        this.assert(\d4.nextNaturalNote(-9) == \b2);
+        this.assert(\b4.nextNaturalNote(7) == \b5);
+        this.assert(\b4.nextNaturalNote(8) == \c6);
+    }
 }
