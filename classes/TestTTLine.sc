@@ -72,19 +72,27 @@ TestTTLine : UnitTest {
         this.assert(line[2].duration == 1);
     }
 
-    test_neighbor_minimalUp {
+    test_arpeggiateInterval_minimalUp {
         var line = TTLine(List[ 
-            LineNote(\a4, 1),
             LineNote(\a4, 1)
         ]);
-        line.neighbor(0, 1 %/ 2, true, \M2);
+        line.arpeggiateInterval(0, \P5, 1 %/ 2, true);
 
         this.assert(line[0].note == \a4);
         this.assert(line[0].duration == (1 %/ 2));
-        this.assert(line[1].note == \b4);
+        this.assert(line[1].note == \e5);
         this.assert(line[1].duration == (1 %/ 2));
-        this.assert(line[2].note == \a4);
-        this.assert(line[2].duration == 1);
     }
 
+    test_arpeggiateInterval_minimalDown {
+        var line = TTLine(List[ 
+            LineNote(\e5, 1)
+        ]);
+        line.arpeggiateInterval(0, \P5, 1 %/ 2, false);
+
+        this.assert(line[0].note == \e5);
+        this.assert(line[0].duration == (1 %/ 2));
+        this.assert(line[1].note == \a4);
+        this.assert(line[1].duration == (1 %/ 2));
+    }
 }

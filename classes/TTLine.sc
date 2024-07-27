@@ -87,7 +87,7 @@ TTLine {
         var highNote = if (arpeggiateNote.isAbove(targetNote.note), { arpeggiateNote }, { targetNote.note });
         var finalFirstNote = if (up, { lowNote }, { highNote });
         var finalLastNote = if (up, { highNote }, { lowNote });
-        if (!arpeggiateInterval.isConsonant(true) && !arpeggiateInterval.isConsonant(false)) {
+        if (arpeggiateInterval.isConsonant(true).not && arpeggiateInterval.isConsonant(false).not) {
             Error("interval between targeted note " ++ targetNote.note ++ " and arpeggiateNote " ++ arpeggiateNote ++ " is " ++ arpeggiateInterval ++ " which is not consonant");
         };
         this.rearticulate(index, firstDuration);
@@ -100,11 +100,10 @@ TTLine {
     the note of the arpeggiation. The interval is applied to the note
     at the target index to determine the arppegiateNote. When 'up' is true the interval will be up.
     */
-    arpeggiateInterval{ |index, interval, firstDuration, up|
+    arpeggiateInterval { |index, interval, firstDuration, up|
         var targetNote = lineNotes[index];
         var arpeggiateNote = if (up, {targetNote.note.intervalAbove(interval)}, {targetNote.note.intervalBelow(interval)});
         this.arpeggiateNote(index, arpeggiateNote, firstDuration, up);
-        // TODO: LEFT OFF - need to add tests for this and above method
     }
 
 }
