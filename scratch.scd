@@ -3,12 +3,10 @@ s.boot;
 Quarks.install("https://github.com/smoge/Rational")
 
 // run individual test classes like this
+TestCounterpoint.run;
 TestNoteSymbol.run;
 TestTTLine.run;
 
 // scratchpad
-1.div(7);
-\c4.nextNaturalNote(-1)
--8.abs;
--8.div(7);
-8 % 7;
+var line = Counterpoint.fullDiatonicStepMotion(\c, \c4, \b4);
+line[0].note;

@@ -26,12 +26,25 @@ Counterpoint {
         };
         // walk from start to end, following the diatonic degrees
         while { iterations < 100 && currentNote != endNote } {
-            var nextNatural = currentNote.nextNatural(step);
-            currentNote = currentNote.alterNote(alterationsDict[nextNatural.tpc]);
-            result.add(currentNote);
+            var nextNatural = currentNote.nextNaturalNote(step);
+            result.add(LineNote(currentNote, 1));
+            currentNote = nextNatural.alterNote(alterationsDict[nextNatural.tpc]);
             iterations = iterations + 1;
         };
-        ^result;
+        result.add(LineNote(currentNote, 1));
+
+        ^(TTLine(result));
     }
+
+    /*
+    fullDiatonicStepMotion with the start and end notes omitted
+    */
+    *diatonicStepMotion { |keyDiatonicRootTPC, startNote, endNote|
+        var fullStepMotion = this.fullDiatonicStepMotion(keyDiatonicRootTPC, startNote, endNote);
+        fullStepMotion.lineNotes.pop;
+        fullStepMotion.lineNotes.removeAt(0);
+        ^fullStepMotion;
+    }
+
 
 }

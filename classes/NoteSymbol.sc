@@ -84,7 +84,6 @@ NoteSymbol {
         var startOctaveIdx = TonalPitchClassSymbol.octaveNaturals[note.tpc.natural];
         var endOctaveIdx = TonalPitchClassSymbol.octaveNaturals[finalNaturalTPC];
         var crossC = if (down) { startOctaveIdx < endOctaveIdx } { startOctaveIdx > endOctaveIdx };
-        octaveShift.postln;
         octaveShift = if (crossC) { octaveShift + sign } { octaveShift };
         ^(finalNaturalTPC.asNote(note.octave + octaveShift));
     }
