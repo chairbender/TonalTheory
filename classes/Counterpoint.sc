@@ -8,7 +8,8 @@ Counterpoint {
     returns a line consisting of whole notes where the notes form a step motion
     using the diatonic degrees of the key from the starting note to the ending note
     (including the start and end note). both notes must
-    have pitch classes that are the key's diatonic degrees (no accidentals)
+    have pitch classes that are the key's diatonic degrees (no accidentals).
+    This is typically used as a kind of building block to iterate upon in order to build a complete counterpoint.
     */
     *fullDiatonicStepMotion { |keyDiatonicRootTPC, startNote, endNote|
         var step = if (endNote.isAbove(startNote)) { 1 } { -1};
@@ -44,6 +45,27 @@ Counterpoint {
         fullStepMotion.lineNotes.pop;
         fullStepMotion.lineNotes.removeAt(0);
         ^fullStepMotion;
+    }
+
+    /*
+    Given a Key and starting octave,
+    returns a line that follows the operational rules:
+
+    1. The final pitch in the basic step motion must be a tonic.
+    2. The first pitch must be a tonic triad member a third fifth or octave
+    above the final pitch.
+    3. These two pitches must be joined by inserting the pitches of intervening diatonic degrees to form
+    a descending step motion.
+
+    To put it in simpler terms, this method creates a line of 2 notes. The first note
+    is a 3rd, 5th, or octave above the tonic, and the last note is the tonic.
+
+    key-vector is the key to use (a vector of 7 tonal pitch classes). octave is the octave
+    to play the ending tonic on. firstNoteIntervalNumber
+    is either 3, 5, or 8 (representing the first note being a major or minor 3rd (based on the key being major or minor), perfect fifth, or perfect octave above the tonic)."
+    */
+    *basicStepMotion{ |key, octave, firstNoteIntervalNumber|
+        
     }
 
 
