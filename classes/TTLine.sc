@@ -16,11 +16,24 @@ TTLine {
     var <lineNotes;
 
     *new { |lineNotes|
+        if (lineNotes.isKindOf(List).not) {
+            Error("lineNotes must be a kind of List but was" + lineNotes.class).throw;
+        };
         ^super.newCopyArgs(lineNotes);
     }
 
+	== { arg that; ^this.compareObject(that, #[\lineNotes]) }
+
+	hash {
+		^this.instVarHash(#[\lineNotes])
+	}
+
     at { |i|
         ^lineNotes[i];
+    }
+
+    printOn { |stream|
+        lineNotes.printOn(stream);
     }
 
     /*
@@ -50,13 +63,13 @@ TTLine {
         var articulationNote2 = lineNotes[articulationIndex + 1];
         var neighborNote = if (up, { articulationNote1.note.intervalAbove(interval) }, { articulationNote1.note.intervalBelow(interval) });
         if (neighborDuration < articulationNote1.duration) {
-            Error("neighborDuration " ++ neighborDuration ++ " must be less than duration of first note of articulation " ++ articulationNote1.duration);
+            Error("neighborDuration " ++ neighborDuration ++ " must be less than duration of first note of articulation " ++ articulationNote1.duration).throw;
         };
         if (articulationNote1.note != articulationNote2.note) {
-            Error("articulationIndex must point at first note of an articulation, but did not. note1: " ++ articulationNote1.note ++ " note2: " ++ articulationNote2.note);
+            Error("articulationIndex must point at first note of an articulation, but did not. note1: " ++ articulationNote1.note ++ " note2: " ++ articulationNote2.note).throw;
         };
         if (interval != \m2 && interval != \M2) {
-            Error("interval must be \m2 or \M2, but was: " ++ interval);
+            Error("interval must be \m2 or \M2, but was: " ++ interval).throw;
         };
         this.rearticulate(articulationIndex, neighborDuration);
         lineNotes[articulationIndex + 1].note = neighborNote;
@@ -88,7 +101,7 @@ TTLine {
         var finalFirstNote = if (up, { lowNote }, { highNote });
         var finalLastNote = if (up, { highNote }, { lowNote });
         if (arpeggiateInterval.isConsonant(true).not && arpeggiateInterval.isConsonant(false).not) {
-            Error("interval between targeted note " ++ targetNote.note ++ " and arpeggiateNote " ++ arpeggiateNote ++ " is " ++ arpeggiateInterval ++ " which is not consonant");
+            Error("interval between targeted note " ++ targetNote.note ++ " and arpeggiateNote " ++ arpeggiateNote ++ " is " ++ arpeggiateInterval ++ " which is not consonant").throw;
         };
         this.rearticulate(index, firstDuration);
         lineNotes[index].note = finalFirstNote;

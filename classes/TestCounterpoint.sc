@@ -2,45 +2,78 @@ TestCounterpoint : UnitTest {
 
     test_fullDiatonicStepMotion_cUp {
         var line = Counterpoint.fullDiatonicStepMotion(\c, \c4, \b4);
-
-        this.assert(line[0].note == \c4);
-        this.assert(line[1].note == \d4);
-        this.assert(line[2].note == \e4);
-        this.assert(line[3].note == \f4);
-        this.assert(line[4].note == \g4);
-        this.assert(line[5].note == \a4);
-        this.assert(line[6].note == \b4);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1),
+            LineNote(\f4, 1),
+            LineNote(\g4, 1),
+            LineNote(\a4, 1),
+            LineNote(\b4, 1),
+        ]);
+        this.assert(line == expected);
     }
 
     test_fullDiatonicStepMotion_cDown {
         var line = Counterpoint.fullDiatonicStepMotion(\c, \c4, \d3);
-
-        this.assert(line[0].note == \c4);
-        this.assert(line[1].note == \b3);
-        this.assert(line[2].note == \a3);
-        this.assert(line[3].note == \g3);
-        this.assert(line[4].note == \f3);
-        this.assert(line[5].note == \e3);
-        this.assert(line[6].note == \d3);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\b3, 1),
+            LineNote(\a3, 1),
+            LineNote(\g3, 1),
+            LineNote(\f3, 1),
+            LineNote(\e3, 1),
+            LineNote(\d3, 1),
+        ]);
+        this.assert(line == expected);
     }
 
     test_diatonicStepMotion_cUp {
         var line = Counterpoint.diatonicStepMotion(\c, \c4, \b4);
-
-        this.assert(line[0].note == \d4);
-        this.assert(line[1].note == \e4);
-        this.assert(line[2].note == \f4);
-        this.assert(line[3].note == \g4);
-        this.assert(line[4].note == \a4);
+        var expected = TTLine(List[
+            LineNote(\d4, 1),
+            LineNote(\e4, 1),
+            LineNote(\f4, 1),
+            LineNote(\g4, 1),
+            LineNote(\a4, 1)
+        ]);
+        this.assert(line == expected);
     }
 
     test_diatonicStepMotion_cDown {
         var line = Counterpoint.diatonicStepMotion(\c, \c4, \d3);
+        var expected = TTLine(List[
+            LineNote(\b3, 1),
+            LineNote(\a3, 1),
+            LineNote(\g3, 1),
+            LineNote(\f3, 1),
+            LineNote(\e3, 1)
+        ]);
+        this.assert(line == expected);
+    }
 
-        this.assert(line[0].note == \b3);
-        this.assert(line[1].note == \a3);
-        this.assert(line[2].note == \g3);
-        this.assert(line[3].note == \f3);
-        this.assert(line[4].note == \e3);
+    test_basicStepMotion_3 {
+        var line = Counterpoint.basicStepMotion(Key(\c, true), 4, 3);
+        var expected = TTLine(List[
+            LineNote(\e4, 1),
+            LineNote(\d4, 1),
+            LineNote(\c4, 1),
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_basicStepMotion_8 {
+        var line = Counterpoint.basicStepMotion(Key(\c, true), 4, 8);
+        var expected = TTLine(List[
+            LineNote(\c5, 1),
+            LineNote(\b4, 1),
+            LineNote(\a4, 1),
+            LineNote(\g4, 1),
+            LineNote(\f4, 1),
+            LineNote(\e4, 1),
+            LineNote(\d4, 1),
+            LineNote(\c4, 1),
+        ]);
+        this.assert(line == expected);
     }
 }

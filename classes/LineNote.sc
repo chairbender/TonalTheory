@@ -19,5 +19,15 @@ LineNote {
     *new { |note, duration|
         ^super.newCopyArgs(note, duration);
     }
+
+    == { arg that; ^this.compareObject(that, #[\note, \duration]) }
+
+	hash {
+		^this.instVarHash(#[\note, \duration])
+	}
+
+    printOn { |stream|
+        stream << "LineNote(" << note << "," << duration << ")";
+    }
 }
 
