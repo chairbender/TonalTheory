@@ -76,4 +76,34 @@ TestCounterpoint : UnitTest {
         ]);
         this.assert(line == expected);
     }
+
+    test_basicArpeggiation_up {
+        var line = Counterpoint.basicArpeggiation(Key(\c, true), 4, 0, true);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g4, 1),
+            LineNote(\c4, 1)
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_basicArpeggiation_down {
+        var line = Counterpoint.basicArpeggiation(Key(\c, true), 4, 0, false);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g3, 1),
+            LineNote(\c4, 1)
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_basicArpeggiation_octaveUp {
+        var line = Counterpoint.basicArpeggiation(Key(\c, true), 4, 1, false);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g4, 1),
+            LineNote(\c5, 1)
+        ]);
+        this.assert(line == expected);
+    }
 }
