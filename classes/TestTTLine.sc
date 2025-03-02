@@ -95,4 +95,14 @@ TestTTLine : UnitTest {
         this.assert(line[1].note == \a4);
         this.assert(line[1].duration == (1 %/ 2));
     }
+
+    test_validNeighborIndices {
+        var line = TTLine(List[ 
+            LineNote(\c5, 1),
+            LineNote(\c5, 1),
+            LineNote(\c5, 1)
+        ]);
+
+        this.assert(line.validNeighborIndices() == List[0, 1])
+    }
 }

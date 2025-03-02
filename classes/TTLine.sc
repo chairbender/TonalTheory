@@ -62,7 +62,7 @@ TTLine {
         var articulationNote1 = lineNotes[articulationIndex];
         var articulationNote2 = lineNotes[articulationIndex + 1];
         var neighborNote = if (up, { articulationNote1.note.intervalAbove(interval) }, { articulationNote1.note.intervalBelow(interval) });
-        if (neighborDuration < articulationNote1.duration) {
+        if (neighborDuration >= articulationNote1.duration) {
             Error("neighborDuration " ++ neighborDuration ++ " must be less than duration of first note of articulation " ++ articulationNote1.duration).throw;
         };
         if (articulationNote1.note != articulationNote2.note) {
@@ -117,6 +117,24 @@ TTLine {
         var targetNote = lineNotes[index];
         var arpeggiateNote = if (up, {targetNote.note.intervalAbove(interval)}, {targetNote.note.intervalBelow(interval)});
         this.arpeggiateNote(index, arpeggiateNote, firstDuration, up);
+    }
+
+    /*
+    Returns a list containing the indices of
+    notes in the line that are repetitions of the same pitch (the index of the first note
+    of the repetition), and thus valid targets of the "neighbor" operation. 
+    Durations are not considered when considering valid neighbor indexes.
+    */
+    validNeighborIndices{
+        var result = List[];
+        lineNotes.do({ |lineNote, i|
+           if (i < (lineNotes.size - 1)) {
+            if (lineNote.note == lineNotes[i+1].note) {
+                result.add(i);
+               };
+           }; 
+        });
+        ^result;
     }
 
 }
