@@ -10,3 +10,6 @@ TestTTLine.run;
 // scratchpad
 var line = Counterpoint.fullDiatonicStepMotion(\c, \c4, \b4);
 line[0].note;
+
+Platform.userExtensionDir;
+
