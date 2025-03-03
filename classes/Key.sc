@@ -38,5 +38,69 @@ Key {
             tpc.asNote(curOctave);
         }));
     }
+
+    /*
+    Returns the index in the degrees of the scale where "c" occurs - i.e. where the
+    octave change occurs (would be 0 for c major).
+    */
+    cIndex { 
+        ^this.degrees.detectIndex({|tpc| tpc.natural == \c});
+    }
+
+    /*
+    Returns the octave of the scale that note appears in, assuming note
+    is in the key. I.e. the result of this could be passed to scale(result)
+    and note would be expected to exist in the resulting scale.
+    example - a minor oct 3
+    a3 b3 c4 d4 e4 f4 g4
+    So scaleOctave(a3) would be 3 and scaleOctave c4 would be 3
+    octave index = 2
+    */
+    scaleOctave { |note|
+        var degrees = this.degrees;
+        var degreeIndex = degrees.indexOf(note.tpc);
+        var cIndex = this.cIndex;
+        if (degreeIndex.isNil) {
+            Error("note" + note + "is not in the key").throw;
+        };
+        ^(if (degreeIndex < cIndex) {
+            note.octave;
+        } {
+            note.octave - 1;
+        })
+    }
+
+    /*
+    Returns the note's
+    'scale index' for the scale of this key. the note must
+    be in the scale, otherwise behavior is undefined.
+    The scale index is defined to be 0 at octave 0 of the tonic (IO), then
+    1, 2, 3, and so on at II0 III0 IV0. -1, -2, and so on
+    corresponds to VII-1, VI-1 and so on."
+    */
+    scaleIndex { |note|
+        var octave = this.scaleOctave(note);
+        var scale = this.scale(octave);
+        var scaleIdx = scale.indexOf(note);
+        ^(scaleIdx + (octave*7));
+    }
+
+    /*
+    returns an array containing the triad pitches of the key that are within
+    an octave of the note
+    */
+    triadPitchesNear { |note|
+        // construct an array containing the max possible range of notes in the scale near
+        // the given note then filter them out. TODO: probably not the most efficient way to implement this method.
+
+        // indices in result which are I, III, and V degress
+        var triadIndices = Set[0, 2, 4, 7, 9, 11, 14, 16, 18];
+        var result = this.scale(note.octave-1);
+        result = result.addAll(this.scale(note.octave));
+        result = result.addAll(this.scale(note.octave+1));
+        ^(result.select({|scaleNote, i|
+            triadIndices.includes(i) && scaleNote.octavesTo(note).abs == 0
+        }));    
+    }
 }
 
