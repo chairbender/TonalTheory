@@ -10,10 +10,6 @@ TestKey : UnitTest {
         this.assert(Key(\a, false).scale(4) == [\a4, \b4, \c5, \d5, \e5, \f5, \g5]);
     }
 
-    test_triadPitchesNear {
-        this.assert(Key(\c, true).triadPitchesNear(\c4) == [\c3, \e3, \g3, \c4, \e4, \g4, \c5])
-    }
-
     test_scaleIndex {
         this.assert(Key(\a, false).scaleIndex(\a0) == 0);
         this.assert(Key(\a, false).scaleIndex(\c1) == 2);
@@ -21,5 +17,17 @@ TestKey : UnitTest {
         this.assert(Key(\a, false).scaleIndex(\c2) == 9);
         this.assert(Key(\a, false).scaleIndex(\a2) == 14);
         this.assert(Key(\a, false).scaleIndex(\c3) == 16);
+
+        this.assert(Key(\c, true).scaleIndex(\c0) == 0);
+        this.assert(Key(\c, true).scaleIndex(\a0) == 5);
+        this.assert(Key(\c, true).scaleIndex(\c1) == 7);
+        this.assert(Key(\c, true).scaleIndex(\a1) == 12);
+        this.assert(Key(\c, true).scaleIndex(\c2) == 14);
+        this.assert(Key(\c, true).scaleIndex(\a2) == 19);
     }
+
+    test_triadPitchesNear {
+        this.assert(Key(\c, true).triadPitchesNear(\c4) == List[\c3, \e3, \g3, \c4, \e4, \g4, \c5])
+    }
+
 }

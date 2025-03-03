@@ -7,6 +7,7 @@ Key {
     var <tonicTPC;
     // boolean - major (true) or minor (false)
     var <isMajor;
+    
 
     *new { |tonicTPC, isMajor|
         ^super.newCopyArgs(tonicTPC, isMajor);
@@ -63,10 +64,10 @@ Key {
         if (degreeIndex.isNil) {
             Error("note" + note + "is not in the key").throw;
         };
-        ^(if (degreeIndex < cIndex) {
-            note.octave;
-        } {
+        ^(if ((cIndex != 0) && (degreeIndex >= cIndex)) {
             note.octave - 1;
+        } {
+            note.octave;
         })
     }
 
@@ -86,7 +87,27 @@ Key {
     }
 
     /*
-    returns an array containing the triad pitches of the key that are within
+    Returns the 0-based degree of the scale of this note, assuming the note exists in the scale.
+    i.e. \c3 returns 0 in c major, \d3 returns 1 in c major.
+    */
+    noteDegree { |note|
+        var octave = this.scaleOctave(note);
+        var scale = this.scale(octave);
+        ^scale.indexOf(note); 
+    }
+
+    /*
+    Given a scale index (as defined in the comments on scaleIndex), returns the note corresponding
+    to that scaleIndex.
+    */
+    noteAtScaleIndex { |scaleIndex|
+        var octave = scaleIndex.div(7);
+        var degree = scaleIndex % 7;
+        ^(this.scale(octave)[degree]);
+    }
+
+    /*
+    returns a list containing the triad pitches of the key that are within
     an octave of the note
     */
     triadPitchesNear { |note|
@@ -94,13 +115,20 @@ Key {
         // the given note then filter them out. TODO: probably not the most efficient way to implement this method.
 
         // indices in result which are I, III, and V degress
-        var triadIndices = Set[0, 2, 4, 7, 9, 11, 14, 16, 18];
-        var result = this.scale(note.octave-1);
-        result = result.addAll(this.scale(note.octave));
-        result = result.addAll(this.scale(note.octave+1));
-        ^(result.select({|scaleNote, i|
-            triadIndices.includes(i) && scaleNote.octavesTo(note).abs == 0
-        }));    
+        var scaleIndex = this.scaleIndex(note);
+        var result = List[];
+
+        // iterate in an octave range (inclusive) around the candidate
+        for (scaleIndex - 7, scaleIndex + 7) { |candidateScaleIndex|
+            var candidateNote = this.noteAtScaleIndex(candidateScaleIndex);
+            var candidateDegree = this.noteDegree(candidateNote);
+            "cn % cd % csi %\n".postf(candidateNote, candidateDegree, candidateScaleIndex);
+            
+            if ((candidateDegree == 0) || (candidateDegree == 2) || (candidateDegree == 4)) {
+                result.add(candidateNote);
+            };
+        };
+        ^result;
     }
 }
 
