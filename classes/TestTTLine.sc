@@ -249,4 +249,30 @@ TestTTLine : UnitTest {
         this.assert(dict[0] == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
         this.assert(dict[1] == [\g3, \c4, \e4, \g4, \c5]); 
     }
+
+    // TODO: not sure if these are actually correct
+    test_validStepMotionInserts_simple {
+        var key = Key(\c, true);
+        var line = TTLine(
+            List[
+                LineNote(\c4, 1),
+                LineNote(\g4, 1),
+            ],
+            key, \primary); 
+        this.assert(line.validStepMotionInserts(8) == List[0]);
+    }
+
+    test_validStepMotionInserts_complex {
+        var key = Key(\c, true);
+        var line = TTLine(
+            List[
+                LineNote(\c4, 1),
+                LineNote(\g4, 1),
+                LineNote(\c5, 1),
+                LineNote(\a4, 1),
+            ],
+            key, \primary); 
+        this.assert(line.validStepMotionInserts(8) == List[0, 1, 2]);
+        this.assert(line.validStepMotionInserts(2) == List[1, 2]);
+    }
 }

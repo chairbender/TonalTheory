@@ -172,7 +172,7 @@ TTLine {
     }
 
     /*
-    Returns a Dictionary of integers to list of notes, where
+    Returns a Dictionary of integers to array of notes, where
     each integer represents an index in targetLine (of a note), and
     the list it maps to indicates the notes that could be inserted
     BEFORE that note,, following the rules of westergaardian theory counterpoint
@@ -203,7 +203,28 @@ TTLine {
         ^result;
     }
 
-        /*
+    /*
+    Returns an list containing the indexes of notes where the
+    following note forms a skip (interval a 3rd or larger) with the note at the specified index,
+    and where the number of notes that would be inserted between the two notes
+    in a step motion is <= limit."
+    */
+    validStepMotionInserts { |limit|
+        var result = List[];
+        for (0, lineNotes.size-2) {|i|
+            var curNote = lineNotes[i].note;
+            var nextNote = lineNotes[i+1].note;
+            var interval = curNote.compoundIntervalTo(nextNote);
+
+            if ((interval.intervalNumber <= (limit + 2)) &&
+                (interval.intervalNumber > 2)) {
+                result.add(i);
+            };
+        };
+        ^result;
+    }
+
+    /*
     For a key (as defined by its diatonic root TPC), starting note, and ending note,
     returns a line consisting of whole notes where the notes form a step motion
     using the diatonic degrees of the key from the starting note to the ending note

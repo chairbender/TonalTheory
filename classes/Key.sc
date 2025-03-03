@@ -129,5 +129,15 @@ Key {
         };
         ^result;
     }
+
+    /*
+    Just like LineNote.validTriadInserts, but only returns a single list with valid inserts between
+    the two given notes.
+    lineType should be the type of line this would be for - see LineNote.type.
+    */
+    validTriadInsertsBetween{ |firstNote, secondNote, lineType|
+        var fakeLine = TTLine(List[LineNote(firstNote,1),LineNote(secondNote,1)], this, lineType);
+        ^(fakeLine.validTriadInsertsBefore(1));    
+    }
 }
 

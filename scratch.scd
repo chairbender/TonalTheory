@@ -2,6 +2,19 @@ s.boot;
 
 Quarks.install("https://github.com/smoge/Rational")
 
+// run all tests in my project
+(
+TestDiatonicCollection.run;
+TestIntervalSymbol.run;
+TestKey.run;
+TestKeySignature.run;
+TestLineNote.run;
+TestNoteSymbol.run;
+TestTonalPitchClassSymbol.run;
+TestTTLine.run;
+)
+
+
 // run individual test classes like this
 TestCounterpoint.run;
 TestNoteSymbol.run;

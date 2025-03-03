@@ -30,4 +30,8 @@ TestKey : UnitTest {
         this.assert(Key(\c, true).triadPitchesNear(\c4) == List[\c3, \e3, \g3, \c4, \e4, \g4, \c5])
     }
 
+    test_validTriadInsertsBetween {
+        this.assert(Key(\c, true).validTriadInsertsBetween(\c4, \g4, \primary) == [\g3, \c4, \e4, \g4, \c5]);
+    }
+
 }
