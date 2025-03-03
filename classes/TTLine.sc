@@ -17,6 +17,7 @@ TTLine {
     // Key the line is in
     var <key;
     // type of the line within the counterpoint - \primary (upper), \secondary (other upper), \lower (lower)
+    // Note that both primary and secondary lines are considered "upper lines"
     var <type;
 
     *new { |lineNotes, key, type|
@@ -38,6 +39,14 @@ TTLine {
 
     printOn { |stream|
         lineNotes.printOn(stream);
+    }
+
+    isUpperLine {
+        ^((type == \primary) || (type == \secondary));
+    }
+
+    isLowerLine {
+        ^(this.isUpperLine.not);
     }
 
     /*
@@ -156,10 +165,10 @@ TTLine {
         ^(validTriads.select({ |triadNote|
             var prevInterval = prevNote.compoundIntervalTo(triadNote);
             var afterInterval = note.compoundIntervalTo(triadNote); 
-            prevInterval.isConsonant(type == \lower) &&
-                afterInterval.isConsonant(type == \lower) &&
+            prevInterval.isConsonant(this.isLowerLine) &&
+                afterInterval.isConsonant(this.isLowerLine) &&
                 (afterInterval.intervalNumber <= 8);
-        }))
+        }));
     }
 
     /*
@@ -177,11 +186,21 @@ TTLine {
         - (and we'll consider a perfect fourth skip in an upper line
     to be consonant). 
     
-    isUpperLine indicates whether this is an upper line of the counterpoint. upperLine being
+    If this is an upper line being
     true also means inserts are allowed before the first note, otherwise they aren't
     */
     validTriadInserts {
-
+        // iterate through the line and find all possible places to insert,
+        // considering only inserting at the start if its an upper line
+        var start = if (this.isUpperLine) { 0 } { 1 };
+        var result = Dictionary();
+        for (start, lineNotes.size - 1) { |i|
+            var inserts = this.validTriadInsertsBefore(i);
+            if (inserts.size != 0) {
+                result.put(i, inserts);
+            };
+        };
+        ^result;
     }
 
         /*
