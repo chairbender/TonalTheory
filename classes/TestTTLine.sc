@@ -212,4 +212,28 @@ TestTTLine : UnitTest {
         ]);
         this.assert(line == expected);
     }
+
+    test_validTriadInsertsBefore_repetition {
+        var key = Key(\c, true);
+        var line = TTLine(
+            List[
+                LineNote(\c4, 1),
+                LineNote(\c4, 1),
+            ],
+            key, \primary);
+        this.assert(line.validTriadInsertsBefore(0) == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
+        this.assert(line.validTriadInsertsBefore(1) == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
+    }
+
+    test_validTriadInsertsBefore_interval {
+        var key = Key(\c, true);
+        var line = TTLine(
+            List[
+                LineNote(\c4, 1),
+                LineNote(\g4, 1),
+            ],
+            key, \primary);
+        this.assert(line.validTriadInsertsBefore(0) == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
+        this.assert(line.validTriadInsertsBefore(1) == [\g3, \c4, \e4, \g4, \c5]);
+    }
 }

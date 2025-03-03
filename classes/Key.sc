@@ -122,7 +122,6 @@ Key {
         for (scaleIndex - 7, scaleIndex + 7) { |candidateScaleIndex|
             var candidateNote = this.noteAtScaleIndex(candidateScaleIndex);
             var candidateDegree = this.noteDegree(candidateNote);
-            "cn % cd % csi %\n".postf(candidateNote, candidateDegree, candidateScaleIndex);
             
             if ((candidateDegree == 0) || (candidateDegree == 2) || (candidateDegree == 4)) {
                 result.add(candidateNote);

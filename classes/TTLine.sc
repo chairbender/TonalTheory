@@ -16,18 +16,20 @@ TTLine {
     var <lineNotes;
     // Key the line is in
     var <key;
+    // type of the line within the counterpoint - \primary (upper), \secondary (other upper), \lower (lower)
+    var <type;
 
-    *new { |lineNotes, key|
+    *new { |lineNotes, key, type|
         if (lineNotes.isKindOf(List).not) {
             Error("lineNotes must be a kind of List but was" + lineNotes.class).throw;
         };
-        ^super.newCopyArgs(lineNotes, key);
+        ^super.newCopyArgs(lineNotes, key, type);
     }
 
-	== { arg that; ^this.compareObject(that, #[\lineNotes, \key]) }
+	== { arg that; ^this.compareObject(that, #[\lineNotes, \key, \type]) }
 
 	hash {
-		^this.instVarHash(#[\lineNotes, \key])
+		^this.instVarHash(#[\lineNotes, \key, \type])
 	}
 
     at { |i|
@@ -140,12 +142,24 @@ TTLine {
     }
 
     /*
-    Returns a list containing the notes
+    Returns an array containing the notes
     that would be valid to insert before the note at
     the given index in the line
+    TODO: Note that currently, we assume if the line is a lower line, it is the lowest sounding note - otherwise
+    it is NOT the lowest sounding note. So this assumes there are no "voice crossings". We should make sure this assumption actually holds.
     */
     validTriadInsertsBefore { |index|
-
+        var note = lineNotes[index].note;
+        var prevNote = if (index == 0) { note } { lineNotes[index-1].note };
+        var validTriads = key.triadPitchesNear(note);
+        // check for consonance with the note that will be before and after the triad insert
+        ^(validTriads.select({ |triadNote|
+            var prevInterval = prevNote.compoundIntervalTo(triadNote);
+            var afterInterval = note.compoundIntervalTo(triadNote); 
+            prevInterval.isConsonant(type == \lower) &&
+                afterInterval.isConsonant(type == \lower) &&
+                (afterInterval.intervalNumber <= 8);
+        }))
     }
 
     /*
