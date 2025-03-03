@@ -11,6 +11,9 @@ Requires quarks:
 
 # TODOs
 
+- refactorings
+	- merge keysignature into key
+	- substitute places where I pass a diatonic root TPC with a Key instance instead.
 - Continue with more of porting
 	- line note
 	- line

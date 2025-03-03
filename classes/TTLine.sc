@@ -41,6 +41,13 @@ TTLine {
         lineNotes.printOn(stream);
     }
 
+    /*
+    Number of notes in this line;
+    */
+    size {
+        ^(lineNotes.size);
+    }
+
     isUpperLine {
         ^((type == \primary) || (type == \secondary));
     }
@@ -225,26 +232,95 @@ TTLine {
     }
 
     /*
-    For a key (as defined by its diatonic root TPC), starting note, and ending note,
-    returns a line consisting of whole notes where the notes form a step motion
+    Returns an array containing the indexes of notes that are triad pitches of the key,
+    meaning those notes are allowed to be repeated w.r.t. the rules of counterpoint.
+    */
+    validTriadRepeats {
+        ^(lineNotes.selectIndices({|lineNote,i|
+            var noteDegree = key.noteDegree(lineNote.note);
+            (noteDegree == 0) || (noteDegree == 2) || (noteDegree == 4);
+        }));
+    }
+
+    /*
+    Returns a step motion TTLine starting on the first note and ending on the ending note, all
+    notes being a whole note.
+    It's allowed for startNote / endNote to have alterations (i.e. accidentals) beyond that implied by the key!
+    
+    The rules for upper and lower line step motion are followed in generating this (the rules are the same):
+    
+    Uses diatonic degrees except for special cases where it uses the raised 6th or 7th degree in a minor key:
+    - a rising step motion from the 5th degree to the tonic
+    - a rising step motion from the 5th degree to the 7th
+    - a falling step motion from the raised seventh to the fifth
+    */
+    *counterpointStepMotion { |startNote, endNote, key|
+        // since startNote or endNote could have alterations, we need to generate a diatonicStepMotion
+        // using their UN-altered form!
+        var startNoteUnaltered = key.unalteredNote(startNote);
+        var endNoteUnaltered = key.unalteredNote(endNote);
+        var line = this.fullDiatonicStepMotion(key, startNoteUnaltered, endNoteUnaltered);
+        var startDegree = key.noteDegree(startNoteUnaltered);
+        var endDegree = key.noteDegree(endNoteUnaltered);
+        line.postln;
+        startDegree.postln;
+        endDegree.postln;
+        // use raised 6th or 7th in case any of the special conditions are met
+        if (key.isMajor.not) {
+            // minor key
+            case {endNote.isAbove(startNote)} {
+                // rising motion
+                case {(startDegree == 4) && (endDegree == 0)} {
+                    //rising from 5th to tonic,
+                    // raise the 6th and 7th degree
+                    line[1].note = line[1].note.alterNote(1);
+                    line[2].note = line[2].note.alterNote(1);
+                }
+                {(startDegree == 4) && (endDegree == 6)} {
+                    // rising from fifth to 7th
+                    // raise the 6th
+                    line[1].note = line[1].note.alterNote(1);
+                };
+            } {startNote.isAbove(endNote) && (endDegree == 4)} {
+                var lowerStartNote = startNote.alterNote(-1);
+                // use a function as the 2nd operand for short-circuiting
+                if (key.containsNote(lowerStartNote) && 
+                    { key.noteDegree(lowerStartNote) == 6 }) {
+                    // falling from raised 7th  to the 5th
+                    // raise the 6th
+                    line[1].note = line[1].note.alterNote(1);
+                };
+            };
+        };
+        // restore the alterations to the start / end note
+        // since the step motion was generated with their unaltered forms
+        line[0].note = startNote;
+        line[line.size-1].note = endNote;
+        line.postln;
+        ^line;
+    }
+
+    /*
+    For a key, starting note, and ending note,
+    returns a TTLine consisting of whole notes where the notes form a step motion
     using the diatonic degrees of the key from the starting note to the ending note
     (including the start and end note). both notes must
     have pitch classes that are the key's diatonic degrees (no accidentals).
     This is typically used as a kind of building block to iterate upon in order to build a complete counterpoint.
     */
-    *fullDiatonicStepMotion { |keyDiatonicRootTPC, startNote, endNote|
+    *fullDiatonicStepMotion { |key, startNote, endNote|
         var step = if (endNote.isAbove(startNote)) { 1 } { -1};
-        var alterationsDict = KeySignature.alterationSemisDict(keyDiatonicRootTPC);
-        var diatonicCollection = DiatonicCollection.ofRoot(keyDiatonicRootTPC);
+        var alterationsDict = KeySignature.alterationSemisDictOfKey(key);
+        var degrees = key.degrees;
         // safeguard against infinite loop
         var iterations = 0;
         var result = List[];
         var currentNote = startNote;
-        if (diatonicCollection.indexOf(startNote.tpc).isNil) {
-            Error("diatonic collection starting on " ++ keyDiatonicRootTPC ++ " does not contain TPC of start note " ++ startNote).throw;
+        if (degrees.indexOf(startNote.tpc).isNil) {
+            Error("key " ++ key ++ " does not contain TPC of start note " ++ startNote).throw;
         };
-        if (diatonicCollection.indexOf(endNote.tpc).isNil) {
-            Error("diatonic collection starting on " ++ keyDiatonicRootTPC ++ " does not contain TPC of end note " ++ endNote).throw;
+        if (degrees.indexOf(endNote.tpc).isNil) {
+            Error("key " ++ key ++ " does not contain TPC of end note " ++ endNote).throw;
         };
         // walk from start to end, following the diatonic degrees
         while { iterations < 100 && currentNote != endNote } {
@@ -261,8 +337,8 @@ TTLine {
     /*
     fullDiatonicStepMotion with the start and end notes omitted
     */
-    *diatonicStepMotion { |keyDiatonicRootTPC, startNote, endNote|
-        var fullStepMotion = this.fullDiatonicStepMotion(keyDiatonicRootTPC, startNote, endNote);
+    *diatonicStepMotion { |key, startNote, endNote|
+        var fullStepMotion = this.fullDiatonicStepMotion(key, startNote, endNote);
         fullStepMotion.lineNotes.pop;
         fullStepMotion.lineNotes.removeAt(0);
         ^fullStepMotion;
@@ -270,7 +346,7 @@ TTLine {
 
     /*
     Given a Key and starting octave,
-    returns a line that follows the operational rules:
+    returns a TTLine that follows the operational rules:
 
     1. The final pitch in the basic step motion must be a tonic.
     2. The first pitch must be a tonic triad member a third fifth or octave
@@ -293,11 +369,11 @@ TTLine {
             5, {scale[4]},
             8, {scale[0].intervalAbove(\P8)},
             { Error("invalid firstNoteIntervalNumber - must be 3, 5, or 8").throw});
-        ^this.fullDiatonicStepMotion(key.tonicTPC, startNote, scale[0])
+        ^this.fullDiatonicStepMotion(key, startNote, scale[0])
     }
 
     /*
-    Generates a basic arpeggiation for the bass line, using the operation rules
+    Generates a basic arpeggiation as a TTLine for the bass line, using the operation rules
     of Tonal Theory:
     
     -Final and first pitch must be tonics. 

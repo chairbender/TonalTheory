@@ -13,17 +13,19 @@ Key {
         ^super.newCopyArgs(tonicTPC, isMajor);
     }
 
+    printOn { |stream|
+        stream << "Key(" << tonicTPC << "," << isMajor << ")";
+    }
+
     /*
     Returns the degrees of the Key as an array of TPCs
     */
     degrees {
-        var relativeMajorRoot;
         if (isMajor) {
             ^DiatonicCollection.ofRoot(tonicTPC);
         };
         // construct the minor from the relative major
-        relativeMajorRoot = tonicTPC.asNote(4).intervalAbove(\m3).tpc;
-        ^(DiatonicCollection.ofRoot(relativeMajorRoot).rotate(2));
+        ^(DiatonicCollection.ofRoot(this.relativeMajorTonicTPC).rotate(2));
     }
 
     /*
@@ -87,13 +89,35 @@ Key {
     }
 
     /*
+    returns true if the key's scale includes the given note,
+    i.e. if the note appears unaltered in this key.
+    This can be called before calling other methods in
+    this class which assume the note is in the key.
+    */
+    containsNote { |note|
+        ^(this.degrees.includes(note.tpc))
+    }
+
+    /*
     Returns the 0-based degree of the scale of this note, assuming the note exists in the scale.
     i.e. \c3 returns 0 in c major, \d3 returns 1 in c major.
+    Remember it's 0-based, not 1 based! So 0 is degree I / tonic!
     */
     noteDegree { |note|
         var octave = this.scaleOctave(note);
         var scale = this.scale(octave);
         ^scale.indexOf(note); 
+    }
+
+    /*
+    Given a note with alterations beyond that present in the key (i.e. accidentals)
+    return the unaltered version of the note.
+    For example in the key of c major, passing \fs would return \f.
+    */
+    unalteredNote { |note|
+        ^(this.degrees.detect({ |degree|
+            degree.letterStepsBetween(note.tpc) == 0
+        }).asNote(note.octave));
     }
 
     /*
@@ -138,6 +162,19 @@ Key {
     validTriadInsertsBetween{ |firstNote, secondNote, lineType|
         var fakeLine = TTLine(List[LineNote(firstNote,1),LineNote(secondNote,1)], this, lineType);
         ^(fakeLine.validTriadInsertsBefore(1));    
+    }
+
+    /*
+    If this is a minor key, return the TPC that should be the tonic of its relative
+    major.
+    For example, given \a, returns \c.
+    */
+    relativeMajorTonicTPC{
+        if (isMajor) {
+            Error("this is a major key, can only compute relative major of a minor key").throw;
+        } {
+            ^(tonicTPC.asNote(4).intervalAbove(\m3).tpc);
+        }
     }
 }
 

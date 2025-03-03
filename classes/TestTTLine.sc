@@ -1,4 +1,11 @@
 TestTTLine : UnitTest {
+    classvar <cKey;
+    classvar <aMinorKey;
+
+    *initClass {
+        cKey = Key(\c, true);
+        aMinorKey = Key(\a, false);
+    }
 
     test_rearticulate_singleInHalf {
         var line = TTLine(List[ 
@@ -107,7 +114,7 @@ TestTTLine : UnitTest {
     }
 
     test_fullDiatonicStepMotion_cUp {
-        var line = TTLine.fullDiatonicStepMotion(\c, \c4, \b4);
+        var line = TTLine.fullDiatonicStepMotion(cKey, \c4, \b4);
         var expected = TTLine(List[
             LineNote(\c4, 1),
             LineNote(\d4, 1),
@@ -121,7 +128,7 @@ TestTTLine : UnitTest {
     }
 
     test_fullDiatonicStepMotion_cDown {
-        var line = TTLine.fullDiatonicStepMotion(\c, \c4, \d3);
+        var line = TTLine.fullDiatonicStepMotion(cKey, \c4, \d3);
         var expected = TTLine(List[
             LineNote(\c4, 1),
             LineNote(\b3, 1),
@@ -135,7 +142,7 @@ TestTTLine : UnitTest {
     }
 
     test_diatonicStepMotion_cUp {
-        var line = TTLine.diatonicStepMotion(\c, \c4, \b4);
+        var line = TTLine.diatonicStepMotion(cKey, \c4, \b4);
         var expected = TTLine(List[
             LineNote(\d4, 1),
             LineNote(\e4, 1),
@@ -147,7 +154,7 @@ TestTTLine : UnitTest {
     }
 
     test_diatonicStepMotion_cDown {
-        var line = TTLine.diatonicStepMotion(\c, \c4, \d3);
+        var line = TTLine.diatonicStepMotion(cKey, \c4, \d3);
         var expected = TTLine(List[
             LineNote(\b3, 1),
             LineNote(\a3, 1),
@@ -287,5 +294,51 @@ TestTTLine : UnitTest {
             ],
             key, \primary); 
         this.assert(line.validTriadRepeats == [0, 1, 3]);
+    }
+
+    test_counterpointStepMotion {
+        var line = TTLine.counterpointStepMotion(\c4, \c5, cKey);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1),
+            LineNote(\f4, 1),
+            LineNote(\g4, 1),
+            LineNote(\a4, 1),
+            LineNote(\b4, 1),
+            LineNote(\c5, 1),
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_counterpointStepMotion_raiseCase1 {
+        var line = TTLine.counterpointStepMotion(\e4, \a4, aMinorKey);
+        var expected = TTLine(List[
+            LineNote(\e4, 1),
+            LineNote(\fs4, 1),
+            LineNote(\gs4, 1),
+            LineNote(\a4, 1),
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_counterpointStepMotion_raiseCase2 {
+        var line = TTLine.counterpointStepMotion(\e4, \g4, aMinorKey);
+        var expected = TTLine(List[
+            LineNote(\e4, 1),
+            LineNote(\fs4, 1),
+            LineNote(\g4, 1),
+        ]);
+        this.assert(line == expected);
+    }
+
+    test_counterpointStepMotion_raiseCase3 {
+        var line = TTLine.counterpointStepMotion(\gs4, \e4, aMinorKey);
+        var expected = TTLine(List[
+            LineNote(\gs4, 1),
+            LineNote(\fs4, 1),
+            LineNote(\e4, 1),
+        ]);
+        this.assert(line == expected);
     }
 }

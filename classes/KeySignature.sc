@@ -66,4 +66,17 @@ KeySignature {
         };
         ^alterations;
     }
+
+    /*
+    Just like alterationSemisDict, but you can pass a key instead of
+    a root TPC. If the key is minor, it will correctly use the relative major key
+    signature.
+    */
+    *alterationSemisDictOfKey{ |key|
+        if (key.isMajor.not) {
+            ^(this.alterationSemisDict(key.relativeMajorTonicTPC))
+        } {
+            ^(this.alterationSemisDict(key.tonicTPC))
+        };
+    }
 }
