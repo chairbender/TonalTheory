@@ -275,4 +275,17 @@ TestTTLine : UnitTest {
         this.assert(line.validStepMotionInserts(8) == List[0, 1, 2]);
         this.assert(line.validStepMotionInserts(2) == List[1, 2]);
     }
+
+    test_validTriadRepeats {
+        var key = Key(\c, true);
+        var line = TTLine(
+            List[
+                LineNote(\c4, 1),
+                LineNote(\g4, 1),
+                LineNote(\a4, 1),
+                LineNote(\c5, 1),
+            ],
+            key, \primary); 
+        this.assert(line.validTriadRepeats == [0, 1, 3]);
+    }
 }
