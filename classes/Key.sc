@@ -99,9 +99,11 @@ Key {
     }
 
     /*
-    Returns the 0-based degree of the scale of this note, assuming the note exists in the scale.
+    Returns the !!!0-based!!! degree of the scale of this note, assuming the note exists in the scale.
     i.e. \c3 returns 0 in c major, \d3 returns 1 in c major.
     Remember it's 0-based, not 1 based! So 0 is degree I / tonic!
+    In terms of code, its easier to work with 0 based. In terms of human, it can be confusing!
+    Apologies!
     */
     noteDegree { |note|
         var octave = this.scaleOctave(note);
@@ -175,6 +177,25 @@ Key {
         } {
             ^(tonicTPC.asNote(4).intervalAbove(\m3).tpc);
         }
+    }
+
+    /*
+    Given a valid starting note for a secondary line (I, III, or V degree, unaltered), returns an array containing notes that would
+    be valid to be an ending note for a secondary line, according to the rule:
+    may be any triad pitch no more than an octave from the first.
+    */
+    validSecondaryEndingNote { |startingNote|
+        var startingDegree = this.noteDegree(startingNote);
+        var startingScaleIdx = this.scaleIndex(startingNote);
+
+        ^(switch (startingDegree,
+            0, { [0, 2, 4, 7, -3, -5, -7] },
+            2, { [0, 2, 5, 7, -2, -5, -7] }, 
+            4, { [0, 3, 5, 7, -2, -4, -7] }, {
+                Error("degree of note must be I, III, or V, was " + (startingDegree+1)).throw;
+            }).collect({|scaleIdxOffset|
+                this.noteAtScaleIndex(startingScaleIdx + scaleIdxOffset)
+            }));
     }
 }
 

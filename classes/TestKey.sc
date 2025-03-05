@@ -1,4 +1,9 @@
 TestKey : UnitTest {
+    classvar <cKey;
+
+    *initClass {
+        cKey = Key(\c, true);
+    }
 
     test_degrees {
         this.assert(Key(\c, true).degrees(1) == [\c, \d, \e, \f, \g, \a, \b]);
@@ -37,6 +42,12 @@ TestKey : UnitTest {
     test_unalteredNote {
         this.assert(Key(\c, true).unalteredNote(\cs4) == \c4);
         this.assert(Key(\c, true).unalteredNote(\as4) == \a4);
+    }
+
+    test_validSecondaryEndingNote {
+        this.assert(cKey.validSecondaryEndingNote(\c4) == [\c4, \e4, \g4, \c5, \g3, \e3, \c3]);
+        this.assert(cKey.validSecondaryEndingNote(\e4) == [\e4, \g4, \c5, \e5, \c4, \g3, \e3]);
+        this.assert(cKey.validSecondaryEndingNote(\g4) == [\g4, \c5, \e5, \g5, \e4, \c4, \g3]);
     }
 
 }
