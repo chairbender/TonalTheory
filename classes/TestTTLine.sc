@@ -79,6 +79,20 @@ TestTTLine : UnitTest {
         this.assert(line[2].duration == 1);
     }
 
+    test_neighbor_cDown {
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\c4, 1)
+        ], cKey);
+        var expected = TTLine(List[
+            LineNote(\c4, 1 %/ 2),
+            LineNote(\b3, 1 %/ 2),
+            LineNote(\c4, 1),
+        ], cKey);
+        line.neighbor(0, 1%/2, false, \m2);
+        this.assert(line == expected);
+    }
+
     test_arpeggiateInterval_minimalUp {
         var line = TTLine(List[ 
             LineNote(\a4, 1)
@@ -341,4 +355,36 @@ TestTTLine : UnitTest {
         ]);
         this.assert(line == expected);
     }
+
+    test_randomNeighborChoice_simpleDown {
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\c4, 1)
+        ], cKey);
+        var expected = TTLine(List[
+            LineNote(\c4, 1 %/ 2),
+            LineNote(\b3, 1 %/ 2),
+            LineNote(\c4, 1),
+        ], cKey);
+        thisThread.randSeed = 123;
+        line.randomNeighbor;
+        this.assert(line == expected);
+    }
+
+    test_randomNeighborChoice_simpleUp {
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\c4, 1)
+        ], cKey);
+        var expected = TTLine(List[
+            LineNote(\c4, 1 %/ 2),
+            LineNote(\d4, 1 %/ 2),
+            LineNote(\c4, 1),
+        ], cKey);
+        thisThread.randSeed = 2;
+        line.randomNeighbor;
+        this.assert(line == expected);
+    }
+
+    // TODO: LEFT OFF - more complex tests with more neighbor candidates
 }

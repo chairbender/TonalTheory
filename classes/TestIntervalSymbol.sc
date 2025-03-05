@@ -38,6 +38,7 @@ TestIntervalSymbol : UnitTest {
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, -1) == \f);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, 6) == \f);
         this.assert(IntervalSymbol.lineOfFifthsLetter(\c, 7) == \c);
+        this.assert(IntervalSymbol.lineOfFifthsLetter(\b, -5) == \c);
     }
 
     test_lineOfFifthsStepsTo {
@@ -57,20 +58,25 @@ TestIntervalSymbol : UnitTest {
 
     test_lineOfFifthsAlterationSemis {
         this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, 3) == 0);
-        this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, 4) == 1);
+        this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, 7) == 1);
+        this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, -1) == -1);
+        this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\b, -5) == 0);
+        this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, -3) == -1);
         this.assert(IntervalSymbol.lineOfFifthsAlterationSemis(\f, -4) == -1);
     }
 
     test_lineOfFifthsTPC {
         this.assert(IntervalSymbol.lineOfFifthsTPC(\f, 3) == \d);
-        this.assert(IntervalSymbol.lineOfFifthsTPC(\f, 4) == \as);
-        this.assert(IntervalSymbol.lineOfFifthsTPC(\f, -3) == \a);
+        this.assert(IntervalSymbol.lineOfFifthsTPC(\f, 4) == \a);
+        this.assert(IntervalSymbol.lineOfFifthsTPC(\f, -3) == \ab);
         this.assert(IntervalSymbol.lineOfFifthsTPC(\f, -4) == \db);
 
         this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, 3) == \ds);
-        this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, 4) == \ass);
-        this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, -3) == \as);
+        this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, 4) == \as);
+        this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, -3) == \a);
         this.assert(IntervalSymbol.lineOfFifthsTPC(\fs, -4) == \d);
+
+        this.assert(IntervalSymbol.lineOfFifthsTPC(\b, -5) == \c)
     }
 
     test_simpleInterval {
@@ -113,10 +119,11 @@ TestIntervalSymbol : UnitTest {
         this.assert(\P8.noteAbove(\a3) == \a4);
         this.assert(\P1.noteAbove(\a3) == \a3);
         this.assert(\M10.noteAbove(\a3) == \cs5);
-        this.assert(\dd2.noteAbove(\es4) == \fbb4);
+        this.assert(\dd2.noteAbove(\es4) == \fb4);
         this.assert(\M2.noteAbove(\g3) == \a3);
         this.assert(\d8.noteAbove(\cs4) == \c5);
         this.assert(\a8.noteAbove(\c4) == \cs5);
+        this.assert(\m2.noteAbove(\b3) == \c4);
     }
 
     test_noteBelow {
@@ -125,9 +132,10 @@ TestIntervalSymbol : UnitTest {
         this.assert(\P8.noteBelow(\a4) == \a3);
         this.assert(\P1.noteBelow(\a3) == \a3);
         this.assert(\M10.noteBelow(\cs4) == \a2);
-        this.assert(\dd2.noteBelow(\fbb4) == \es4);
+        this.assert(\dd2.noteBelow(\fb4) == \es4);
         this.assert(\M2.noteBelow(\a4) == \g4);
         this.assert(\d8.noteBelow(\c5) == \cs4);
         this.assert(\a8.noteBelow(\cs5) == \c4);
+        this.assert(\m2.noteBelow(\c4) == \b3);
     }
 }

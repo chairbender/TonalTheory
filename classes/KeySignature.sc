@@ -73,7 +73,7 @@ KeySignature {
     signature.
     */
     *alterationSemisDictOfKey{ |key|
-        if (key.isMajor.not) {
+        if (key.isMinor) {
             ^(this.alterationSemisDict(key.relativeMajorTonicTPC))
         } {
             ^(this.alterationSemisDict(key.tonicTPC))

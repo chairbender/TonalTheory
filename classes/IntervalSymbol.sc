@@ -89,10 +89,20 @@ IntervalSymbol {
     }
 
     /*
+    We define the lineOfFifthsLetterIndex as an index into the infinite pattern
+    F C G D A E B F C G D A E B.
+    This method returns the lineOfFifthsLetterIndex for the tpc at the given offset.
+    For example, if tpc is C and offset is 2, the result is 3 (C is at index 1, and 1 + 2 = 3)
+    */
+    *lineOfFifthsLetterIndexAtOffset{|tpc, offset|
+        ^(lineOfFifthsLetters.indexOf(tpc.natural) + offset);
+    }
+
+    /*
     Starting on the (natural) letter 'tpc' in the line of fifths and walking 'offset' steps, return the letter we arrive at.
     */
     *lineOfFifthsLetter { |tpc, offset|
-        var finalIdx = lineOfFifthsLetters.indexOf(tpc.natural) + offset;
+        var finalIdx = this.lineOfFifthsLetterIndexAtOffset(tpc, offset);
         ^lineOfFifthsLetters[finalIdx % 7];
     }
 
@@ -116,46 +126,45 @@ IntervalSymbol {
         ^this.lineOfFifthsStepsTo(centerTPC, tpc) + ((tpc.alterationSemis - centerTPC.alterationSemis) * 7);
     }
 
-    /*Return the alteration semitones of the tonal pitch class that exists at the given index
-    in the line of fifths centered on tpc, as a number of semitones up (positive, i.e. sharps)
+    /*Return the alteration semitones of the tonal pitch class that exists at the given offset
+    in the line of fifths from tpc, as a number of semitones up (positive, i.e. sharps)
     or down (negative, i.e. flats).
     Another way of putting it is this walks on the line of fifths
     <index> steps, and returns the alterations, added to the alterations of TPC
-    For example, the LOF centered at F looks like this 
-    (note the actual center pitch class LETTER doesn't matter for this function as the pattern of alterations doesn't depend on the center letter, though it DOES depend on the ALTERATIONS of the center TPC):
-    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
-    Fb Cb Gb Db A  E   B F C G D A# E# B# F#
-    So index = 3 returns 0 (there is no alteration on "D").
-    But index 4 would return 1, and -4 would return -1 (corresponding to the A# / Db on the above line at index 4 / -4 .
+    The line of fifths looks like this
+    Fb Cb Gb Db Ab Eb Bb F C G D A E B F# C# G# D# A# E# B#
 
-    Now a more complicated example. What if the center TPC has alterations in it already? For example, let's say the center is F#. Then
-    the LOF looks like this:
-    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
-    F C G D A#  E#   B# F# C# G# D# A## E## B## F##
-    So index 3 returns 1, index 4 / -4 returns 2, 0.
-    Basically, the alterations are just added to the alterations
-    of the center TPC.
+    So if we pass F to this method, the offsets look like:
+    .. Bbb Fb Cb Gb Db Ab Eb Bb F C G D A E B F# C# G# D# A# E# B# F## ... 
+       -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7  8  9  10 11 12 13  14 15
+
+    So offset = 3 returns 0 (there is no alteration on "D").
+    But offset 7 would return 1 (F# - one sharp), and -1 would return -1 (corresponding to the Bb)
+    
+    And, for example, if we passed F#, 7, we would get 2 (F##)
     */
-    *lineOfFifthsAlterationSemis{ |tpc, index|
-        // -3 to +3 are the "0 alterations" range. So let's say -3 is the "start"
-        // and modulo from there
-        var adjustedIdx = index + 3;
-        // now how many times are we looping through the letters
-        // in either direction? That gives us the
-        // number of alterations to add / subtract from the center tpc
-        var loops = adjustedIdx.div(7);
-        ^(loops + tpc.alterationSemis);
+    *lineOfFifthsAlterationSemis{ |tpc, offset|
+        var letterIndexOffset = this.lineOfFifthsLetterIndexAtOffset(tpc, offset);
+        // if you're moving in the NEGATIVE direction, your offset is "flipped" in the letterIndexOffset
+        // because the letters go B E A D G C F as you walk more negative. So your letter index should
+        // actually be F C G D A E B = 6 5 4 3 2 1 0
+        var adjustedOffset = if (letterIndexOffset >= 0) {letterIndexOffset} {letterIndexOffset - 6};
+        // div doesn't work how I expected - -6.div(7) gives -1 instead of 0. 
+        // I must be missing something about how it is
+        // supposed to work. To avoid that quirk, we keep it positive and negate it after if needed
+        var cycles = (adjustedOffset.abs.div(7)) * (adjustedOffset.sign);
+        ^(cycles + tpc.alterationSemis);
     }
 
     /* get the tonal pitch class at the given index
     for the line of fifths centered on tpc
-    For example, the line of fifths centered on F looks like
-    -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4  5  6  7
-    Fb Cb Gb Db A  E   B F C G D A# E# B# F#
-    So tpc=F, index 4 gives A#
+    The line of fifths looks like this
+    Fb Cb Gb Db Ab Eb Bb F C G D A E B F# C# G# D# A# E# B#
+
+    So tpc=F, index 4 gives A
     */
-    *lineOfFifthsTPC { |tpc, index|
-        ^this.lineOfFifthsLetter(tpc, index).alterTPC(this.lineOfFifthsAlterationSemis(tpc, index));
+    *lineOfFifthsTPC { |tpc, offset|
+        ^this.lineOfFifthsLetter(tpc, offset).alterTPC(this.lineOfFifthsAlterationSemis(tpc, offset));
     }
 
     /* return the quality of the provided interval symbol, as a string */

@@ -17,6 +17,10 @@ Key {
         stream << "Key(" << tonicTPC << "," << isMajor << ")";
     }
 
+    isMinor {
+        ^(isMajor.not);
+    }
+
     /*
     Returns the degrees of the Key as an array of TPCs
     */

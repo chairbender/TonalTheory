@@ -88,7 +88,7 @@ TTLine {
         if (articulationNote1.note != articulationNote2.note) {
             Error("articulationIndex must point at first note of an articulation, but did not. note1: " ++ articulationNote1.note ++ " note2: " ++ articulationNote2.note).throw;
         };
-        if (interval != \m2 && interval != \M2) {
+        if ((interval != \m2) && (interval != \M2)) {
             Error("interval must be \m2 or \M2, but was: " ++ interval).throw;
         };
         this.rearticulate(articulationIndex, neighborDuration);
@@ -243,6 +243,43 @@ TTLine {
     }
 
     /*
+    Mutates the line. Performs a random neighbor operation on a valid target (i.e. rearticulate the first note of an existing
+    rearticulation, then raise/lower the new 2nd note) 
+    Rules are followed:
+        - the neighbor is always a member of the diatonic collection
+            - except when it is the lower neighbor to the tonic in a minor key, in which
+            case it is altered so as to be a minor 2nd from the tonic.
+    
+    The duration of the neighbor will be half the duration of the rearticulated note. 
+    Returns a RandomNeighborChoice instance indicating what random choice was made, or nil if
+    there was no valid target;
+    */
+    randomNeighbor { 
+        var chosenIndex = this.validNeighborIndices.choose;
+        var up = 0.5.coin;
+
+        if (chosenIndex.isNil.not) {
+            var chosenNote = lineNotes[chosenIndex].note;
+            var chosenNoteDur = lineNotes[chosenIndex].duration;
+            var neighborDuration = chosenNoteDur * (1 %/ 2);
+            var chosenNoteScaleIdx = key.scaleIndex(chosenNote);
+            var chosenNoteDegree = key.noteDegree(chosenNote);
+
+            // lower neighbor to the tonic in a minor key?
+            var interval = if (up.not && (chosenNoteDegree == 1) && (key.isMinor)) {
+                \m2
+            } {
+                // figure out the interval name we need to use to perform the operation
+                var offset = if (up) {1} {-1};
+                var neighborNote = key.noteAtScaleIndex(chosenNoteScaleIdx + offset);
+                chosenNote.compoundIntervalTo(neighborNote)
+            };
+            this.neighbor(chosenIndex, neighborDuration, up, interval);
+            ^(RandomNeighborChoice(chosenIndex,up));
+        };
+    }
+
+    /*
     Returns a step motion TTLine starting on the first note and ending on the ending note, all
     notes being a whole note.
     It's allowed for startNote / endNote to have alterations (i.e. accidentals) beyond that implied by the key!
@@ -262,11 +299,8 @@ TTLine {
         var line = this.fullDiatonicStepMotion(key, startNoteUnaltered, endNoteUnaltered);
         var startDegree = key.noteDegree(startNoteUnaltered);
         var endDegree = key.noteDegree(endNoteUnaltered);
-        line.postln;
-        startDegree.postln;
-        endDegree.postln;
         // use raised 6th or 7th in case any of the special conditions are met
-        if (key.isMajor.not) {
+        if (key.isMinor) {
             // minor key
             case {endNote.isAbove(startNote)} {
                 // rising motion
@@ -296,7 +330,6 @@ TTLine {
         // since the step motion was generated with their unaltered forms
         line[0].note = startNote;
         line[line.size-1].note = endNote;
-        line.postln;
         ^line;
     }
 
