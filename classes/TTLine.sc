@@ -372,9 +372,25 @@ TTLine {
 
 
     /*
+    Creates a random basic arpeggiation line, following the rules for lower lines, in the given key.
+    First octave is used as the octave of the first tonic.
     */
-    *randomBasicArpeggiation {
-
+    *randomBasicArpeggiation {|firstOctave, key|
+        var octaveOffset = [-1, 0, 1].choose;
+        var chosenLastOctave = firstOctave + octaveOffset;
+        var chosenMiddleUp = 0.5.coin;
+        var firstScale = key.scale(firstOctave);
+        var lastScale = key.scale(chosenLastOctave);
+        var firstNote = firstScale[0];
+        var middleNote = if (chosenMiddleUp) { lastScale[4] } { lastScale[4].tpc.note(chosenLastOctave-1)}
+        // will the middle note be more than a 5th from the 1st note? if so, we need to pick an insert note
+        // otherwise we can choose whatever - it won't be used by basicArpeggiation.
+        var insertNote = if (firstNote.compoundIntervalTo(middleNote).intervalNumber > 5) {
+            // randomly pick an insert note because basicArpeggiation will use it
+            key.validTriadInsertsBetween(firstNote, middleNote, \lower).choose
+        } { \c4 }
+        // TODO: LEFT OFF - write test for this
+        ^(this.basicArpeggiation(key, firstOctave, octaveOffset, chosenMiddleUp, insertNote))
     }
 
     /*
