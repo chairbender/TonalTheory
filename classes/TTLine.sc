@@ -280,6 +280,28 @@ TTLine {
     }
 
     /*
+    Mutates the line. Following rules for upper / lower line triad inserts (depending on this line's line type),
+    randomly inserts a triad pitch of the given key (I III or V)
+    between two pitches or before the first pitch, but never creating
+    a dissonant skip or a skip larger than an octave. The duration
+    of the inserted pitch is always a whole note
+    Returns a RandomTriadInsertChoice indicating the choice that was made, or nil
+    if there were no valid targets
+    */
+    randomTriadInsert {
+        var validInserts = this.validTriadInserts;
+        if (validInserts.notNil) {
+            var chosenIndex = validInserts.keys.choose;
+            var validNeighborNotes = validInserts[chosenIndex];
+            if (validNeighborNotes.notEmpty) {
+                var chosenNote = validNeighborNotes.choose;
+                lineNotes.insert(chosenIndex,LineNote(chosenNote,1));
+                ^(RandomTriadInsertChoice(chosenIndex,chosenNote));
+            }
+        };
+    }
+
+    /*
     Returns a step motion TTLine starting on the first note and ending on the ending note, all
     notes being a whole note.
     It's allowed for startNote / endNote to have alterations (i.e. accidentals) beyond that implied by the key!

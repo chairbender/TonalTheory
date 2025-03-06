@@ -367,7 +367,7 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
         ], cKey);
         thisThread.randSeed = 123;
-        line.randomNeighbor;
+        this.assert(line.randomNeighbor == RandomNeighborChoice(0, false));
         this.assert(line == expected);
     }
 
@@ -382,9 +382,46 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
         ], cKey);
         thisThread.randSeed = 2;
-        line.randomNeighbor;
+        this.assert(line.randomNeighbor == RandomNeighborChoice(0, true));
         this.assert(line == expected);
     }
 
-    // TODO: LEFT OFF - more complex tests with more neighbor candidates
+    test_randomTriadInsert_primary {
+        var choice;
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g3, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        thisThread.randSeed = 2;
+        choice = line.randomTriadInsert;
+        this.assert(choice == RandomTriadInsertChoice(1, \g3));
+        this.assert(line == expected);
+    }
+
+    test_randomTriadInsert_lower{
+        var choice;
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        thisThread.randSeed = 6;
+        choice = line.randomTriadInsert;
+        this.assert(choice == RandomTriadInsertChoice(1, \g4));
+        this.assert(line == expected);
+    }
+
 }
