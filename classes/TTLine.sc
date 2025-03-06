@@ -316,7 +316,7 @@ TTLine {
     */
     randomStepMotionInsert {|limit|
         var validIndices = this.validStepMotionInserts(limit);
-        if (validIndices.size > 0) {
+        if (validIndices.notEmpty) {
             var chosenIndex = validIndices.choose;
             var startNote = lineNotes[chosenIndex].note;
             var endNote = lineNotes[chosenIndex+1].note;
@@ -336,6 +336,45 @@ TTLine {
             lineNotes = result;
             ^(RandomStepMotionChoice(chosenIndex));
         };
+    }
+
+    /*
+    randomly repeats a triad note in the line, always using a whole note
+    for the new note. Returns RandomTriadRepeatChoice indicating the choice, or nil if no valid target.
+    */
+    randomTriadRepeat {
+        var validIndices = this.validTriadRepeats;
+        if (validIndices.notEmpty) {
+            var chosenIndex = validIndices.choose;
+            var chosenNote = lineNotes[chosenIndex].note;
+            // TODO: in the old code, I think the whole note was inserted BEFORE the existing note...
+            // but shouldn't it come after? That's what it's doing here. Check with the book.
+            lineNotes.insert(chosenIndex+1, LineNote(chosenNote,1));
+            ^(RandomTriadRepeatChoice(chosenIndex));
+        };
+    }
+
+
+    /*
+    Generates a random primary line in the given key at the given
+    octave, randomly performing any allowed operation some number of times.
+    key-vector indicates the key, octave indicates the octave of the starting note,
+    and length determines the length of the resulting line in whole notes.
+    */
+    // *randomPrimaryLine {|key, octave, length|
+    //     var line = this.basicStepMotion(key, octave, [3,5,8].choose);
+    //     while { line.size < length } {
+    //         var chosenOperation = 
+
+    //     };
+
+    // }
+
+
+    /*
+    */
+    *randomBasicArpeggiation {
+
     }
 
     /*

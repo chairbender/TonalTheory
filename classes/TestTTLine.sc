@@ -441,9 +441,26 @@ TestTTLine : UnitTest {
         ], cKey, \primary);
         thisThread.randSeed = 6;
         choice = line.randomStepMotionInsert(100);
-        choice.postln;
-        line.postln;
         this.assert(choice == RandomStepMotionChoice(1));
+        this.assert(line == expected);
+    }
+
+    test_randomTriadRepeat{
+        var choice;
+        var line = TTLine(List[ 
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\d4, 1),
+            LineNote(\e4, 1),
+            LineNote(\e4, 1)
+        ], cKey, \primary);
+        thisThread.randSeed = 6;
+        choice = line.randomTriadRepeat;
+        this.assert(choice == RandomTriadRepeatChoice(2));
         this.assert(line == expected);
     }
 

@@ -1,5 +1,5 @@
-RandomStepMotionChoice {
-    // index of the start note of the step motion, after which the step motion was inserted
+RandomTriadRepeatChoice {
+    // index of the note that was repeated
     var <index;
 
     *new { |index|
