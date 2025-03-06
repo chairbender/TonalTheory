@@ -211,7 +211,7 @@ TTLine {
     }
 
     /*
-    Returns an list containing the indexes of notes where the
+    Returns a list containing the indexes of notes where the
     following note forms a skip (interval a 3rd or larger) with the note at the specified index,
     and where the number of notes that would be inserted between the two notes
     in a step motion is <= limit."
@@ -298,6 +298,43 @@ TTLine {
                 lineNotes.insert(chosenIndex,LineNote(chosenNote,1));
                 ^(RandomTriadInsertChoice(chosenIndex,chosenNote));
             }
+        };
+    }
+
+    /*
+    Mutates the line. Inserts a step motion between 2 random consecutive notes that form a skip.
+    Uses the diatonic degrees for the step motion except for the following rules, where it instead
+    uses the raised 6th / 7th in a minor key:
+    - rising step motion from 5th degree to the tonic
+    - rising step motion from the 5th degree to the 7th
+    - falling step motion from the raised 7th to the fifth
+
+    The duration of the inserted notes are all whole notes.
+    Does nothing + returns nil if the target line has no valid places to insert. Otherwise, returns
+    RandomStepMotionChoice indicating the choice. The duration of the notes inserted are all whole notes.
+    Limit means only step motions that would insert <= limit notes will be performed.
+    */
+    randomStepMotionInsert {|limit|
+        var validIndices = this.validStepMotionInserts(limit);
+        if (validIndices.size > 0) {
+            var chosenIndex = validIndices.choose;
+            var startNote = lineNotes[chosenIndex].note;
+            var endNote = lineNotes[chosenIndex+1].note;
+            var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key).lineNotes;
+            // I can't find a way to insert one list into the other at a specific place, so this will have to do instead...
+            // start with the run up to the startNote, minus the start note itself since its already included in the
+            // step motion line
+            // TODO: maybe a more efficient way to do this - this creates quite a few "intermediate" copies...
+            var result = if (chosenIndex > 0) { lineNotes.copyRange(0,chosenIndex-1) } { List[] };
+            // insert step motion line
+            result.addAll(stepMotionLineNotes);
+            // insert everything after, excluding the endNote from the original line since it's already at the end
+            // of the inserted step motion
+            if (chosenIndex < (lineNotes.size-2)) {
+                result.addAll(lineNotes.copyRange(chosenIndex+2))
+            };
+            lineNotes = result;
+            ^(RandomStepMotionChoice(chosenIndex));
         };
     }
 

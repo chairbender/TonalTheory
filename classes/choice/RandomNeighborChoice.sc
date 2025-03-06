@@ -1,6 +1,3 @@
-/*
-A selection for a random neighbor operation
-*/
 RandomNeighborChoice {
     // index of the chosen first note of the neighbor operation within the line
     var <index;

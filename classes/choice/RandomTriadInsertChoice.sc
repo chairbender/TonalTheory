@@ -1,6 +1,3 @@
-/*
-A selection for a random neighbor operation
-*/
 RandomTriadInsertChoice {
     // index the note was inserted at
     var <index;
