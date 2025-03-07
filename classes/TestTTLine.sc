@@ -464,4 +464,18 @@ TestTTLine : UnitTest {
         this.assert(line == expected);
     }
 
+    test_randomBasicArpeggiation {
+        var choice;
+        var line ;
+        var expected = TTLine(List[
+            LineNote(\c4, 1),
+            LineNote(\g3, 1),
+            LineNote(\c4, 1)
+        ]);
+        thisThread.randSeed = 6;
+        line = TTLine.randomBasicArpeggiation(4,cKey);
+        line.postln;
+        this.assert(line == expected); 
+    }
+
 }
