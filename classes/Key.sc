@@ -13,6 +13,12 @@ Key {
         ^super.newCopyArgs(tonicTPC, isMajor);
     }
 
+    == { arg that; ^this.compareObject(that, #[\tonicTPC, \isMajor]) }
+
+	hash {
+		^this.instVarHash(#[\tonicTPC, \isMajor])
+	}
+
     printOn { |stream|
         stream << "Key(" << tonicTPC << "," << isMajor << ")";
     }

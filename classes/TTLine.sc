@@ -322,7 +322,7 @@ TTLine {
             var chosenIndex = validIndices.choose;
             var startNote = lineNotes[chosenIndex].note;
             var endNote = lineNotes[chosenIndex+1].note;
-            var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key).lineNotes;
+            var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key, type).lineNotes;
             // I can't find a way to insert one list into the other at a specific place, so this will have to do instead...
             // start with the run up to the startNote, minus the start note itself since its already included in the
             // step motion line
@@ -363,14 +363,18 @@ TTLine {
     key-vector indicates the key, octave indicates the octave of the starting note,
     and length determines the length of the resulting line in whole notes.
     */
-    // *randomPrimaryLine {|key, octave, length|
-    //     var line = this.basicStepMotion(key, octave, [3,5,8].choose);
-    //     while { line.size < length } {
-    //         var chosenOperation = 
-
-    //     };
-
-    // }
+    *randomPrimaryLine {|key, octave, length|
+        var line = this.basicStepMotion(key, \primary, octave, [3,5,8].choose);
+        while { line.size < length } {
+            [
+                {line.randomTriadRepeat},
+                {line.randomNeighbor},
+                {line.randomTriadInsert},
+                {line.randomStepMotionInsert(length - line.size)}
+            ].choose.value;
+        };
+        ^line;
+    }
 
 
     /*
@@ -406,13 +410,15 @@ TTLine {
     - a rising step motion from the 5th degree to the tonic
     - a rising step motion from the 5th degree to the 7th
     - a falling step motion from the raised seventh to the fifth
+
+    lineType is the line type to assign the returned line.
     */
-    *counterpointStepMotion { |startNote, endNote, key|
+    *counterpointStepMotion { |startNote, endNote, key, lineType|
         // since startNote or endNote could have alterations, we need to generate a diatonicStepMotion
         // using their UN-altered form!
         var startNoteUnaltered = key.unalteredNote(startNote);
         var endNoteUnaltered = key.unalteredNote(endNote);
-        var line = this.fullDiatonicStepMotion(key, startNoteUnaltered, endNoteUnaltered);
+        var line = this.fullDiatonicStepMotion(key, lineType, startNoteUnaltered, endNoteUnaltered);
         var startDegree = key.noteDegree(startNoteUnaltered);
         var endDegree = key.noteDegree(endNoteUnaltered);
         // use raised 6th or 7th in case any of the special conditions are met
@@ -456,8 +462,10 @@ TTLine {
     (including the start and end note). both notes must
     have pitch classes that are the key's diatonic degrees (no accidentals).
     This is typically used as a kind of building block to iterate upon in order to build a complete counterpoint.
+    
+    lineType is the line type to assign the returned line.
     */
-    *fullDiatonicStepMotion { |key, startNote, endNote|
+    *fullDiatonicStepMotion { |key, lineType, startNote, endNote|
         var step = if (endNote.isAbove(startNote)) { 1 } { -1};
         var alterationsDict = KeySignature.alterationSemisDictOfKey(key);
         var degrees = key.degrees;
@@ -480,14 +488,14 @@ TTLine {
         };
         result.add(LineNote(currentNote, 1));
 
-        ^(TTLine(result));
+        ^(TTLine(result,key,lineType));
     }
 
     /*
     fullDiatonicStepMotion with the start and end notes omitted
     */
-    *diatonicStepMotion { |key, startNote, endNote|
-        var fullStepMotion = this.fullDiatonicStepMotion(key, startNote, endNote);
+    *diatonicStepMotion { |key, lineType, startNote, endNote|
+        var fullStepMotion = this.fullDiatonicStepMotion(key, lineType, startNote, endNote);
         fullStepMotion.lineNotes.pop;
         fullStepMotion.lineNotes.removeAt(0);
         ^fullStepMotion;
@@ -508,17 +516,18 @@ TTLine {
     Every note is a whole note.
 
     key is the Key to use (e.g. Key(\c, false))
+    lineType is the line type to assign the returned line.
     octave is the octave to play the ending tonic on. firstNoteIntervalNumber
     is either 3, 5, or 8 (representing the first note being a major or minor 3rd (based on the key being major or minor), perfect fifth, or perfect octave above the tonic)."
     */
-    *basicStepMotion{ |key, octave, firstNoteIntervalNumber|
+    *basicStepMotion{ |key, lineType, octave, firstNoteIntervalNumber|
         var scale = key.scale(octave);
         var startNote = switch (firstNoteIntervalNumber,
             3, {scale[2]},
             5, {scale[4]},
             8, {scale[0].intervalAbove(\P8)},
             { Error("invalid firstNoteIntervalNumber - must be 3, 5, or 8").throw});
-        ^this.fullDiatonicStepMotion(key, startNote, scale[0])
+        ^this.fullDiatonicStepMotion(key, lineType, startNote, scale[0])
     }
 
     /*
@@ -574,9 +583,9 @@ TTLine {
         if (firstNote.compoundIntervalTo(middleNote).intervalNumber > 5) {
             // first to middle interval is greater than a fifth, so need to insert
             // a triad pitch
-            ^TTLine(List[LineNote(firstNote,1), LineNote(insertNote,1), LineNote(middleNote,1), LineNote(lastNote,1)])
+            ^TTLine(List[LineNote(firstNote,1), LineNote(insertNote,1), LineNote(middleNote,1), LineNote(lastNote,1)],key,\lower)
         } {
-            ^TTLine(List[LineNote(firstNote,1), LineNote(middleNote,1), LineNote(lastNote,1)])
+            ^TTLine(List[LineNote(firstNote,1), LineNote(middleNote,1), LineNote(lastNote,1)],key,\lower)
         };
     }
 

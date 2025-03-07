@@ -10,7 +10,7 @@ TestTTLine : UnitTest {
     test_rearticulate_singleInHalf {
         var line = TTLine(List[ 
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         line.rearticulate(0, 1 %/ 2);
 
         this.assert(line[0].note == \a4);
@@ -22,7 +22,7 @@ TestTTLine : UnitTest {
     test_rearticulate_singleUneven {
         var line = TTLine(List[ 
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         line.rearticulate(0, 1 %/ 4);
 
         this.assert(line[0].note == \a4);
@@ -36,7 +36,7 @@ TestTTLine : UnitTest {
             LineNote(\a4, 1),
             LineNote(\b4, 1),
             LineNote(\c4, 1)
-        ]);
+        ], cKey, \primary);
         line.rearticulate(1, 1 %/ 2);
 
         this.assert(line[0].note == \a4);
@@ -53,7 +53,7 @@ TestTTLine : UnitTest {
         var line = TTLine(List[ 
             LineNote(\a4, 1),
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         line.neighbor(0, 1 %/ 2, true, \M2);
 
         this.assert(line[0].note == \a4);
@@ -68,7 +68,7 @@ TestTTLine : UnitTest {
         var line = TTLine(List[ 
             LineNote(\a4, 1),
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         line.neighbor(0, 1 %/ 2, false, \M2);
 
         this.assert(line[0].note == \a4);
@@ -83,12 +83,12 @@ TestTTLine : UnitTest {
         var line = TTLine(List[ 
             LineNote(\c4, 1),
             LineNote(\c4, 1)
-        ], cKey);
+        ], cKey, \primary);
         var expected = TTLine(List[
             LineNote(\c4, 1 %/ 2),
             LineNote(\b3, 1 %/ 2),
             LineNote(\c4, 1),
-        ], cKey);
+        ], cKey, \primary);
         line.neighbor(0, 1%/2, false, \m2);
         this.assert(line == expected);
     }
@@ -96,7 +96,7 @@ TestTTLine : UnitTest {
     test_arpeggiateInterval_minimalUp {
         var line = TTLine(List[ 
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         line.arpeggiateInterval(0, \P5, 1 %/ 2, true);
 
         this.assert(line[0].note == \a4);
@@ -108,7 +108,7 @@ TestTTLine : UnitTest {
     test_arpeggiateInterval_minimalDown {
         var line = TTLine(List[ 
             LineNote(\e5, 1)
-        ]);
+        ], cKey, \primary);
         line.arpeggiateInterval(0, \P5, 1 %/ 2, false);
 
         this.assert(line[0].note == \e5);
@@ -122,13 +122,13 @@ TestTTLine : UnitTest {
             LineNote(\c5, 1),
             LineNote(\c5, 1),
             LineNote(\c5, 1)
-        ]);
+        ], cKey, \primary);
 
         this.assert(line.validNeighborIndices() == List[0, 1])
     }
 
     test_fullDiatonicStepMotion_cUp {
-        var line = TTLine.fullDiatonicStepMotion(cKey, \c4, \b4);
+        var line = TTLine.fullDiatonicStepMotion(cKey, \primary, \c4, \b4);
         var expected = TTLine(List[
             LineNote(\c4, 1),
             LineNote(\d4, 1),
@@ -137,12 +137,12 @@ TestTTLine : UnitTest {
             LineNote(\g4, 1),
             LineNote(\a4, 1),
             LineNote(\b4, 1),
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_fullDiatonicStepMotion_cDown {
-        var line = TTLine.fullDiatonicStepMotion(cKey, \c4, \d3);
+        var line = TTLine.fullDiatonicStepMotion(cKey, \primary, \c4, \d3);
         var expected = TTLine(List[
             LineNote(\c4, 1),
             LineNote(\b3, 1),
@@ -151,46 +151,46 @@ TestTTLine : UnitTest {
             LineNote(\f3, 1),
             LineNote(\e3, 1),
             LineNote(\d3, 1),
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_diatonicStepMotion_cUp {
-        var line = TTLine.diatonicStepMotion(cKey, \c4, \b4);
+        var line = TTLine.diatonicStepMotion(cKey, \primary, \c4, \b4);
         var expected = TTLine(List[
             LineNote(\d4, 1),
             LineNote(\e4, 1),
             LineNote(\f4, 1),
             LineNote(\g4, 1),
             LineNote(\a4, 1)
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_diatonicStepMotion_cDown {
-        var line = TTLine.diatonicStepMotion(cKey, \c4, \d3);
+        var line = TTLine.diatonicStepMotion(cKey, \primary, \c4, \d3);
         var expected = TTLine(List[
             LineNote(\b3, 1),
             LineNote(\a3, 1),
             LineNote(\g3, 1),
             LineNote(\f3, 1),
             LineNote(\e3, 1)
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_basicStepMotion_3 {
-        var line = TTLine.basicStepMotion(Key(\c, true), 4, 3);
+        var line = TTLine.basicStepMotion(Key(\c, true), \primary, 4, 3);
         var expected = TTLine(List[
             LineNote(\e4, 1),
             LineNote(\d4, 1),
             LineNote(\c4, 1),
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_basicStepMotion_8 {
-        var line = TTLine.basicStepMotion(Key(\c, true), 4, 8);
+        var line = TTLine.basicStepMotion(Key(\c, true), \primary, 4, 8);
         var expected = TTLine(List[
             LineNote(\c5, 1),
             LineNote(\b4, 1),
@@ -200,7 +200,7 @@ TestTTLine : UnitTest {
             LineNote(\e4, 1),
             LineNote(\d4, 1),
             LineNote(\c4, 1),
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
@@ -210,7 +210,7 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
             LineNote(\g4, 1),
             LineNote(\c4, 1)
-        ]);
+        ], cKey, \lower);
         this.assert(line == expected);
     }
 
@@ -220,7 +220,7 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
             LineNote(\g3, 1),
             LineNote(\c4, 1)
-        ]);
+        ], cKey, \lower);
         this.assert(line == expected);
     }
 
@@ -230,7 +230,7 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
             LineNote(\g4, 1),
             LineNote(\c5, 1)
-        ]);
+        ], cKey, \lower);
         this.assert(line == expected);
     }
 
@@ -311,7 +311,7 @@ TestTTLine : UnitTest {
     }
 
     test_counterpointStepMotion {
-        var line = TTLine.counterpointStepMotion(\c4, \c5, cKey);
+        var line = TTLine.counterpointStepMotion(\c4, \c5, cKey, \primary);
         var expected = TTLine(List[
             LineNote(\c4, 1),
             LineNote(\d4, 1),
@@ -321,38 +321,38 @@ TestTTLine : UnitTest {
             LineNote(\a4, 1),
             LineNote(\b4, 1),
             LineNote(\c5, 1),
-        ]);
+        ], cKey, \primary);
         this.assert(line == expected);
     }
 
     test_counterpointStepMotion_raiseCase1 {
-        var line = TTLine.counterpointStepMotion(\e4, \a4, aMinorKey);
+        var line = TTLine.counterpointStepMotion(\e4, \a4, aMinorKey, \primary);
         var expected = TTLine(List[
             LineNote(\e4, 1),
             LineNote(\fs4, 1),
             LineNote(\gs4, 1),
             LineNote(\a4, 1),
-        ]);
+        ], aMinorKey, \primary);
         this.assert(line == expected);
     }
 
     test_counterpointStepMotion_raiseCase2 {
-        var line = TTLine.counterpointStepMotion(\e4, \g4, aMinorKey);
+        var line = TTLine.counterpointStepMotion(\e4, \g4, aMinorKey, \primary);
         var expected = TTLine(List[
             LineNote(\e4, 1),
             LineNote(\fs4, 1),
             LineNote(\g4, 1),
-        ]);
+        ], aMinorKey, \primary);
         this.assert(line == expected);
     }
 
     test_counterpointStepMotion_raiseCase3 {
-        var line = TTLine.counterpointStepMotion(\gs4, \e4, aMinorKey);
+        var line = TTLine.counterpointStepMotion(\gs4, \e4, aMinorKey, \primary);
         var expected = TTLine(List[
             LineNote(\gs4, 1),
             LineNote(\fs4, 1),
             LineNote(\e4, 1),
-        ]);
+        ], aMinorKey, \primary);
         this.assert(line == expected);
     }
 
@@ -360,12 +360,12 @@ TestTTLine : UnitTest {
         var line = TTLine(List[ 
             LineNote(\c4, 1),
             LineNote(\c4, 1)
-        ], cKey);
+        ], cKey, \primary);
         var expected = TTLine(List[
             LineNote(\c4, 1 %/ 2),
             LineNote(\b3, 1 %/ 2),
             LineNote(\c4, 1),
-        ], cKey);
+        ], cKey, \primary);
         thisThread.randSeed = 123;
         this.assert(line.randomNeighbor == RandomNeighborChoice(0, false));
         this.assert(line == expected);
@@ -375,12 +375,12 @@ TestTTLine : UnitTest {
         var line = TTLine(List[ 
             LineNote(\c4, 1),
             LineNote(\c4, 1)
-        ], cKey);
+        ], cKey, \primary);
         var expected = TTLine(List[
             LineNote(\c4, 1 %/ 2),
             LineNote(\d4, 1 %/ 2),
             LineNote(\c4, 1),
-        ], cKey);
+        ], cKey, \primary);
         thisThread.randSeed = 2;
         this.assert(line.randomNeighbor == RandomNeighborChoice(0, true));
         this.assert(line == expected);
@@ -471,10 +471,27 @@ TestTTLine : UnitTest {
             LineNote(\c4, 1),
             LineNote(\g3, 1),
             LineNote(\c4, 1)
-        ]);
+        ], cKey, \lower);
         thisThread.randSeed = 6;
         line = TTLine.randomBasicArpeggiation(4,cKey);
-        line.postln;
+        this.assert(line == expected); 
+    }
+
+    test_randomPrimaryLine {
+        var choice;
+        var line ;
+        var expected = TTLine(List[
+            LineNote(\e4, 1),
+            LineNote(\e4, 1%/2),
+            LineNote(\d4, 1%/2),
+            LineNote(\e4, 1),
+            LineNote(\g4, 1),
+            LineNote(\d4, 1),
+            LineNote(\g3, 1),
+            LineNote(\c4, 1),
+        ], cKey, \primary);
+        thisThread.randSeed = 7;
+        line = TTLine.randomPrimaryLine(cKey, 4, 8);
         this.assert(line == expected); 
     }
 
