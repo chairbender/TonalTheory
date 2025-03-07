@@ -39,6 +39,13 @@ Key {
     }
 
     /*
+    natural degrees of the scale (i.e. no alterations), useful for some methods internally
+    */
+    naturalDegrees {
+        ^(this.degrees.collect({|degree| degree.natural}));
+    }
+
+    /*
     Just like degrees, but converted to the notes of a single-octave scale starting on the indicated octave.
     */
     scale { |octave|
@@ -57,12 +64,12 @@ Key {
     octave change occurs (would be 0 for c major).
     */
     cIndex { 
-        ^this.degrees.detectIndex({|tpc| tpc.natural == \c});
+        ^this.naturalDegrees.indexOf(\c);
     }
 
     /*
-    Returns the octave of the scale that note appears in, assuming note
-    is in the key. I.e. the result of this could be passed to scale(result)
+    Returns the octave of the scale that note appears in, ignoring accidentals.
+     I.e. the result of this could be passed to scale(result)
     and note would be expected to exist in the resulting scale.
     example - a minor oct 3
     a3 b3 c4 d4 e4 f4 g4
@@ -70,12 +77,8 @@ Key {
     octave index = 2
     */
     scaleOctave { |note|
-        var degrees = this.degrees;
-        var degreeIndex = degrees.indexOf(note.tpc);
+        var degreeIndex = this.noteDegree(note);
         var cIndex = this.cIndex;
-        if (degreeIndex.isNil) {
-            Error("note" + note + "is not in the key").throw;
-        };
         ^(if ((cIndex != 0) && (degreeIndex >= cIndex)) {
             note.octave - 1;
         } {
@@ -85,16 +88,14 @@ Key {
 
     /*
     Returns the note's
-    'scale index' for the scale of this key. the note must
-    be in the scale, otherwise behavior is undefined.
+    'scale index' for the scale of this key, ignoring accidentals
     The scale index is defined to be 0 at octave 0 of the tonic (IO), then
     1, 2, 3, and so on at II0 III0 IV0. -1, -2, and so on
     corresponds to VII-1, VI-1 and so on."
     */
     scaleIndex { |note|
         var octave = this.scaleOctave(note);
-        var scale = this.scale(octave);
-        var scaleIdx = scale.indexOf(note);
+        var scaleIdx = this.noteDegree(note);
         ^(scaleIdx + (octave*7));
     }
 
@@ -109,16 +110,18 @@ Key {
     }
 
     /*
-    Returns the !!!0-based!!! degree of the scale of this note, assuming the note exists in the scale.
+    Returns the !!!0-based!!! degree of the scale of this note, ignoring accidentals
     i.e. \c3 returns 0 in c major, \d3 returns 1 in c major.
     Remember it's 0-based, not 1 based! So 0 is degree I / tonic!
     In terms of code, its easier to work with 0 based. In terms of human, it can be confusing!
     Apologies!
     */
     noteDegree { |note|
-        var octave = this.scaleOctave(note);
-        var scale = this.scale(octave);
-        ^scale.indexOf(note); 
+        ^(this.naturalDegrees.indexOf(note.tpc.natural));
+        //var octave = this.scaleOctave(note);
+        //var scale = this.scale(octave);
+        //^(scale.detect({|scaleNote| note.tpc.natural == scaleNote.tpc.natural })); 
+        //^(scale.indexOf(note));
     }
 
     /*

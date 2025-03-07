@@ -292,7 +292,7 @@ TTLine {
     */
     randomTriadInsert {
         var validInserts = this.validTriadInserts;
-        if (validInserts.notNil) {
+        if (validInserts.notEmpty) {
             var chosenIndex = validInserts.keys.choose;
             var validNeighborNotes = validInserts[chosenIndex];
             if (validNeighborNotes.notEmpty) {
