@@ -50,6 +50,14 @@ TTLine {
         ^(lineNotes.size);
     }
 
+    /*
+    sum of beats in this line
+    */
+    beats {
+        ^(lineNotes.collect({|lineNote| lineNote.duration * 4}).sum);
+
+    }
+
     isUpperLine {
         ^((type == \primary) || (type == \secondary));
     }
@@ -379,23 +387,19 @@ TTLine {
     }
 
     /*
-    Generates an array of random counterpoint lines with 'length' number of notes
+    Generates an array of random counterpoint lines with 'beats' number of beats
 
     octaves should be an array indicating the octaves to use for each line,
     and the size determines the number of lines generated. The first line is
     always primary, and last line is always lower. All other lines are secondary.
     key determines the key of the counterpoint.
-
-    TODO: create version that actually sets the number of MEASURES of 4/4 so its a 
-    good length. This could be a new class that lets you configure how to define the length that
-    we propagate through these methods.
     */
-    *randomCounterpointLines{|length, key, octaves|
+    *randomCounterpointLines{|beats, key, octaves|
         ^(octaves.collect({|octave, i|
             switch (i,
-                0, { this.randomPrimaryLine(key, octave, length) },
-                (octaves.size-1), { this.randomLowerLine(key, octave, length) },
-                { this.randomSecondaryLine(key, octave, length) }
+                0, { this.randomPrimaryLine(key, octave, beats) },
+                (octaves.size-1), { this.randomLowerLine(key, octave, beats) },
+                { this.randomSecondaryLine(key, octave, beats) }
             )
         }));
     }
@@ -405,16 +409,16 @@ TTLine {
     Generates a random primary line in the given key at the given
     octave, randomly performing any allowed operation some number of times.
     key-vector indicates the key, octave indicates the octave of the starting note,
-    and length determines the length of the resulting line in whole notes.
+    and beats determines the total beats of the resulting line
     */
-    *randomPrimaryLine {|key, octave, length|
+    *randomPrimaryLine {|key, octave, beats|
         var line = this.basicStepMotion(key, \primary, octave, #[3,5,8].choose);
-        while { line.size < length } {
+        while { line.beats < beats } {
             [
                 {line.randomTriadRepeat},
                 {line.randomNeighbor},
                 {line.randomTriadInsert},
-                {line.randomStepMotionInsert(length - line.size)}
+                {line.randomStepMotionInsert(beats - line.beats)}
             ].choose.value;
         };
         ^line;
@@ -423,14 +427,14 @@ TTLine {
     /*
     Just like randomPrimaryLine, but for a secondary line
     */
-    *randomSecondaryLine{|key, octave, length|
-        var line = this.randomSecondaryBasicStructure(key, octave, length);
-        while { line.size < length } {
+    *randomSecondaryLine{|key, octave, beats|
+        var line = this.randomSecondaryBasicStructure(key, octave, beats);
+        while { line.beats < beats } {
             [
                 {line.randomTriadRepeat},
                 {line.randomNeighbor},
                 {line.randomTriadInsert},
-                {line.randomStepMotionInsert(length - line.size)}
+                {line.randomStepMotionInsert(beats - line.beats)}
             ].choose.value;
         };
         ^line;
@@ -439,14 +443,14 @@ TTLine {
     /*
     Line randomPrimaryLine, but generates a lower line.
     */
-    *randomLowerLine {|key, octave, length|
+    *randomLowerLine {|key, octave, beats|
         var line = this.randomBasicArpeggiation(octave, key);
-        while { line.size < length } {
+        while { line.beats < beats } {
             [
                 {line.randomTriadRepeat},
                 {line.randomNeighbor},
                 {line.randomTriadInsert},
-                {line.randomStepMotionInsert(length - line.size)}
+                {line.randomStepMotionInsert(beats - line.beats)}
             ].choose.value;
         };
         ^line;
