@@ -97,6 +97,7 @@ NoteSymbol {
     tpc { ^NoteSymbol.tpc(this) }
     octave { ^NoteSymbol.octave(this) }
     semis { ^NoteSymbol.semis(this) }
+    midi { ^NoteSymbol.semis(this) }
     alterNote { |semis| ^NoteSymbol.alterNote(this, semis) }
     compoundIntervalTo { |otherNote| ^IntervalSymbol.compoundIntervalBetween(this,otherNote) }
     simpleIntervalTo { |otherNote| ^IntervalSymbol.simpleIntervalBetween(this,otherNote) }

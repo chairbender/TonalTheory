@@ -199,9 +199,9 @@ Key {
         var startingScaleIdx = this.scaleIndex(startingNote);
 
         ^(switch (startingDegree,
-            0, { [0, 2, 4, 7, -3, -5, -7] },
-            2, { [0, 2, 5, 7, -2, -5, -7] }, 
-            4, { [0, 3, 5, 7, -2, -4, -7] }, {
+            0, { #[0, 2, 4, 7, -3, -5, -7] },
+            2, { #[0, 2, 5, 7, -2, -5, -7] }, 
+            4, { #[0, 3, 5, 7, -2, -4, -7] }, {
                 Error("degree of note must be I, III, or V, was " + (startingDegree+1)).throw;
             }).collect({|scaleIdxOffset|
                 this.noteAtScaleIndex(startingScaleIdx + scaleIdxOffset)

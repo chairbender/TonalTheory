@@ -333,7 +333,7 @@ TTLine {
             // insert everything after, excluding the endNote from the original line since it's already at the end
             // of the inserted step motion
             if (chosenIndex < (lineNotes.size-2)) {
-                result.addAll(lineNotes.copyRange(chosenIndex+2))
+                result.addAll(lineNotes.copyRange(chosenIndex+2,lineNotes.size-1))
             };
             lineNotes = result;
             ^(RandomStepMotionChoice(chosenIndex));
@@ -356,6 +356,50 @@ TTLine {
         };
     }
 
+    /*
+    Returns an array consisting of the note midi values. Use with .deltas for
+    Patterns.
+    */
+    midinotes {
+        ^(lineNotes.collect({|lineNote|
+            lineNote.note.midi
+        }));
+    }
+
+    /*
+    Returns an array consisting of the beats of each note. Use with .midinotes for
+    Patterns. A note duration of 1 == a whole note, i.e. 4 beats 
+    (all this stuff currently assumes 4/4 time)
+    TODO: Does it work without conversion to float?
+    */
+    deltas {
+        ^(lineNotes.collect({|lineNote|
+            (lineNote.duration*4).asFloat
+        }));
+    }
+
+    /*
+    Generates an array of random counterpoint lines with 'length' number of notes
+
+    octaves should be an array indicating the octaves to use for each line,
+    and the size determines the number of lines generated. The first line is
+    always primary, and last line is always lower. All other lines are secondary.
+    key determines the key of the counterpoint.
+
+    TODO: create version that actually sets the number of MEASURES of 4/4 so its a 
+    good length. This could be a new class that lets you configure how to define the length that
+    we propagate through these methods.
+    */
+    *randomCounterpointLines{|length, key, octaves|
+        ^(octaves.collect({|octave, i|
+            switch (i,
+                0, { this.randomPrimaryLine(key, octave, length) },
+                (octaves.size-1), { this.randomLowerLine(key, octave, length) },
+                { this.randomSecondaryLine(key, octave, length) }
+            )
+        }));
+    }
+
 
     /*
     Generates a random primary line in the given key at the given
@@ -364,7 +408,7 @@ TTLine {
     and length determines the length of the resulting line in whole notes.
     */
     *randomPrimaryLine {|key, octave, length|
-        var line = this.basicStepMotion(key, \primary, octave, [3,5,8].choose);
+        var line = this.basicStepMotion(key, \primary, octave, #[3,5,8].choose);
         while { line.size < length } {
             [
                 {line.randomTriadRepeat},
@@ -376,13 +420,67 @@ TTLine {
         ^line;
     }
 
+    /*
+    Just like randomPrimaryLine, but for a secondary line
+    */
+    *randomSecondaryLine{|key, octave, length|
+        var line = this.randomSecondaryBasicStructure(key, octave, length);
+        while { line.size < length } {
+            [
+                {line.randomTriadRepeat},
+                {line.randomNeighbor},
+                {line.randomTriadInsert},
+                {line.randomStepMotionInsert(length - line.size)}
+            ].choose.value;
+        };
+        ^line;
+    }
+
+    /*
+    Line randomPrimaryLine, but generates a lower line.
+    */
+    *randomLowerLine {|key, octave, length|
+        var line = this.randomBasicArpeggiation(octave, key);
+        while { line.size < length } {
+            [
+                {line.randomTriadRepeat},
+                {line.randomNeighbor},
+                {line.randomTriadInsert},
+                {line.randomStepMotionInsert(length - line.size)}
+            ].choose.value;
+        };
+        ^line;
+    }
+
+    /*
+    Creates a random starting basic structure for a secondary line. Rules are:
+    - the final pitch must be a tonic triad member
+    - the first pitch must be a tonic triad member no more than an octave from the final pitch
+    
+    firstOctave is the octave to use for the first note
+    */
+    *randomSecondaryBasicStructure{|key,firstOctave,limit|
+        var chosenFirstDegree = #[0,2,4].choose;
+        var chosenFirstNote = key.scale(firstOctave)[chosenFirstDegree];
+        var chosenFinalNote = key.validSecondaryEndingNote(chosenFirstNote).choose;
+        var line = TTLine(List[LineNote(chosenFirstNote,1),LineNote(chosenFinalNote,1)],key,\secondary);
+        if (0.5.coin) {
+            if (chosenFirstNote == chosenFinalNote) {
+                line.randomNeighbor;
+            } {
+                line.randomStepMotionInsert(limit);
+            }
+        };
+        ^line;
+    }
+
 
     /*
     Creates a random basic arpeggiation line, following the rules for lower lines, in the given key.
     First octave is used as the octave of the first tonic.
     */
     *randomBasicArpeggiation {|firstOctave, key|
-        var octaveOffset = [-1, 0, 1].choose;
+        var octaveOffset = #[-1, 0, 1].choose;
         var chosenLastOctave = firstOctave + octaveOffset;
         var chosenMiddleUp = 0.5.coin;
         var firstScale = key.scale(firstOctave);
