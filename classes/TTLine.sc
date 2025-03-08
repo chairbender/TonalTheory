@@ -401,6 +401,44 @@ TTLine {
     }
 
     /*
+    Randomly mutate the line until it reaches the indicated number of beats
+    */
+    mutateUntilBeats{|beats|
+        while {this.beats < beats} {
+            TTLine.chooseMutation(beats).value(this);
+        };
+    }
+
+    /*
+    Returns a function that applies a mutation to a line, ensuring the function will not
+    generate a line with more than the specified number of beats.
+    This can then be applied to a line for e.g. via result.value(someLine);
+    */
+    *chooseMutation{|beats| 
+        ^([
+            {|line| line.randomTriadRepeat},
+            {|line| line.randomNeighbor},
+            {|line| line.randomTriadInsert},
+            {|line| line.randomStepMotionInsert(beats - line.beats)}
+        ].choose);
+    }
+
+    /*
+    like randomCounterPointLines but generates only the starting line for each line type.
+    Apply further mutations yourself, such as using chooseMutation to choose a mutation, then
+    applying it to this line (and repeating this process).
+    */
+    *startLines{|key, octaves|
+        ^(octaves.collect({|octave, i|
+            switch (i,
+                0, { this.basicStepMotion(key, \primary, octave, #[3,5,8].choose) },
+                (octaves.size-1), { this.randomBasicArpeggiation(octave, key) },
+                { this.randomSecondaryBasicStructure(key, octave, 100) }
+            )
+        }));
+    }
+
+    /*
     Generates an array of random counterpoint lines with 'beats' number of beats
 
     octaves should be an array indicating the octaves to use for each line,
@@ -418,6 +456,13 @@ TTLine {
         }));
     }
 
+    *randomLine {|beats, line|
+        while { line.beats < beats } {
+            this.chooseMutation(beats).value(line);
+        };
+        ^line; 
+    }
+
 
     /*
     Generates a random primary line in the given key at the given
@@ -426,51 +471,21 @@ TTLine {
     and beats determines the total beats of the resulting line
     */
     *randomPrimaryLine {|key, octave, beats|
-        var line = this.basicStepMotion(key, \primary, octave, #[3,5,8].choose);
-        while { line.beats < beats } {
-            var choice = (0..3).choose;
-            var curBeats = line.beats;
-            [
-                {line.randomTriadRepeat},
-                {line.randomNeighbor},
-                {line.randomTriadInsert},
-                {line.randomStepMotionInsert(beats - line.beats)}
-            ][choice].value;
-        };
-        ^line;
+        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, #[3,5,8].choose));
     }
 
     /*
     Just like randomPrimaryLine, but for a secondary line
     */
     *randomSecondaryLine{|key, octave, beats|
-        var line = this.randomSecondaryBasicStructure(key, octave, beats);
-        while { line.beats < beats } {
-            var choice = (0..3).choose;
-            [
-                {line.randomTriadRepeat},
-                {line.randomNeighbor},
-                {line.randomTriadInsert},
-                {line.randomStepMotionInsert(beats - line.beats)}
-            ][choice].value;
-        };
-        ^line;
+        ^this.randomLine(beats, this.randomSecondaryBasicStructure(key, octave, beats));
     }
 
     /*
     Line randomPrimaryLine, but generates a lower line.
     */
     *randomLowerLine {|key, octave, beats|
-        var line = this.randomBasicArpeggiation(octave, key);
-        while { line.beats < beats } {
-            [
-                {line.randomTriadRepeat},
-                {line.randomNeighbor},
-                {line.randomTriadInsert},
-                {line.randomStepMotionInsert(beats - line.beats)}
-            ].choose.value;
-        };
-        ^line;
+        ^this.randomLine(beats, this.randomBasicArpeggiation(octave, key));
     }
 
     /*
