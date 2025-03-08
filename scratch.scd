@@ -38,11 +38,18 @@ TestTTLine.run;
     // play
     // TODO: better way to ensure synchornized start time
     TempoClock.default.tempo = 414/60;
-    ~patterns.do({|pattern| pattern.play });
+    Ppar(~patterns).play;
+
 )
-~deltas[0].postln
-~midinotes[0].postln
 ~patterns[0].play
+~lines[3].postln
+~lines.do({|line| line.beats.postln});
+
+(
+    ~line = TTLine.randomPrimaryLine(Key(\a, false), 4, 4*16);
+    ~line.postln;
+    ~line.beats.postln;
+)
 
 (
     TempoClock.default.tempo = 84/60;

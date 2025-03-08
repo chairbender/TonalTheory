@@ -280,7 +280,7 @@ TestTTLine : UnitTest {
                 LineNote(\g4, 1),
             ],
             key, \primary); 
-        this.assert(line.validStepMotionInserts(8) == List[0]);
+        this.assert(line.validStepMotionInserts(32) == List[0]);
     }
 
     test_validStepMotionInserts_complex {
@@ -293,8 +293,8 @@ TestTTLine : UnitTest {
                 LineNote(\a4, 1),
             ],
             key, \primary); 
-        this.assert(line.validStepMotionInserts(8) == List[0, 1, 2]);
-        this.assert(line.validStepMotionInserts(2) == List[1, 2]);
+        this.assert(line.validStepMotionInserts(32) == List[0, 1, 2]);
+        this.assert(line.validStepMotionInserts(8) == List[1, 2]);
     }
 
     test_validTriadRepeats {
@@ -485,13 +485,15 @@ TestTTLine : UnitTest {
             LineNote(\e4, 1%/2),
             LineNote(\d4, 1%/2),
             LineNote(\e4, 1),
+            LineNote(\c5, 1),
             LineNote(\g4, 1),
             LineNote(\d4, 1),
             LineNote(\g3, 1),
             LineNote(\c4, 1),
         ], cKey, \primary);
         thisThread.randSeed = 7;
-        line = TTLine.randomPrimaryLine(cKey, 4, 8);
+        line = TTLine.randomPrimaryLine(cKey, 4, 32);
+        line.postln;
         this.assert(line == expected); 
     }
 

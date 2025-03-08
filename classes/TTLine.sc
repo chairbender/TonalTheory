@@ -67,7 +67,7 @@ TTLine {
     }
 
     /*
-    Rearticulate the note at the given index in this line.
+    Rearticulate the note at the given index in this line. This preserves the total beats in the line.
     (the note is split into two notes whose total duration equals the original note's duration,
     and who are the same note as the original). The duration of the first note in the
     rearticulation is equal to firstDuration. firstDuration must be a duration less than
@@ -81,19 +81,20 @@ TTLine {
     }
 
     /*
+    Preserves the number of beats in the line as the note is split.
     Given an index pointing at the first note of a rearticulation in the line (articulationIndex),
     inserts a neighbor between the rearticulation notes. A neighbor is simply a note a minor or major second
     above or below the two notes, caused by rearticulating the first note
     of the rearticulation, then moving it up or down a second. if 'up' is true, the neighbor will be above, otherwise it will be
-    below. The duration of the neighbor will be 'neighborDuration', and it must be less than
+    below. The note will be split, with the duration of the first note being'firstDuration', and it must be less than
     the duration of the first note of the rearticulation. 'interval' must be \m2 or \M2.
     */
-    neighbor { |articulationIndex, neighborDuration, up, interval|
+    neighbor { |articulationIndex, firstDuration, up, interval|
         var articulationNote1 = lineNotes[articulationIndex];
         var articulationNote2 = lineNotes[articulationIndex + 1];
         var neighborNote = if (up, { articulationNote1.note.intervalAbove(interval) }, { articulationNote1.note.intervalBelow(interval) });
-        if (neighborDuration >= articulationNote1.duration) {
-            Error("neighborDuration " ++ neighborDuration ++ " must be less than duration of first note of articulation " ++ articulationNote1.duration).throw;
+        if (firstDuration >= articulationNote1.duration) {
+            Error("firstDuration " ++ firstDuration ++ " must be less than duration of first note of articulation " ++ articulationNote1.duration).throw;
         };
         if (articulationNote1.note != articulationNote2.note) {
             Error("articulationIndex must point at first note of an articulation, but did not. note1: " ++ articulationNote1.note ++ " note2: " ++ articulationNote2.note).throw;
@@ -101,7 +102,7 @@ TTLine {
         if ((interval != \m2) && (interval != \M2)) {
             Error("interval must be \m2 or \M2, but was: " ++ interval).throw;
         };
-        this.rearticulate(articulationIndex, neighborDuration);
+        this.rearticulate(articulationIndex, firstDuration);
         lineNotes[articulationIndex + 1].note = neighborNote;
     }
 
@@ -223,17 +224,21 @@ TTLine {
     /*
     Returns a list containing the indexes of notes where the
     following note forms a skip (interval a 3rd or larger) with the note at the specified index,
-    and where the number of notes that would be inserted between the two notes
-    in a step motion is <= limit."
+    and where the number of beats that would be inserted between the two notes
+    in a step motion is <= beats (4 beats per note because all inserted notes are going to be whole notes)
     */
-    validStepMotionInserts { |limit|
+    validStepMotionInserts { |beats|
         var result = List[];
         for (0, lineNotes.size-2) {|i|
             var curNote = lineNotes[i].note;
             var nextNote = lineNotes[i+1].note;
             var interval = curNote.compoundIntervalTo(nextNote);
+            curNote.postln;
+            nextNote.postln;
+            interval.postln;
 
-            if ((interval.intervalNumber <= (limit + 2)) &&
+
+            if ((((interval.intervalNumber - 2)*4) <= beats) &&
                 (interval.intervalNumber > 2)) {
                 result.add(i);
             };
@@ -253,6 +258,7 @@ TTLine {
     }
 
     /*
+    Preserves the total beats in the line.
     Mutates the line. Performs a random neighbor operation on a valid target (i.e. rearticulate the first note of an existing
     rearticulation, then raise/lower the new 2nd note) 
     Rules are followed:
@@ -260,7 +266,7 @@ TTLine {
             - except when it is the lower neighbor to the tonic in a minor key, in which
             case it is altered so as to be a minor 2nd from the tonic.
     
-    The duration of the neighbor will be half the duration of the rearticulated note. 
+    The targeted note will be split in half (half going to the neighbor). 
     Returns a RandomNeighborChoice instance indicating what random choice was made, or nil if
     there was no valid target;
     */
@@ -271,7 +277,7 @@ TTLine {
         if (chosenIndex.isNil.not) {
             var chosenNote = lineNotes[chosenIndex].note;
             var chosenNoteDur = lineNotes[chosenIndex].duration;
-            var neighborDuration = chosenNoteDur * (1 %/ 2);
+            var firstDuration = chosenNoteDur * (1 %/ 2);
             var chosenNoteScaleIdx = key.scaleIndex(chosenNote);
             var chosenNoteDegree = key.noteDegree(chosenNote);
 
@@ -284,7 +290,7 @@ TTLine {
                 var neighborNote = key.noteAtScaleIndex(chosenNoteScaleIdx + offset);
                 chosenNote.compoundIntervalTo(neighborNote)
             };
-            this.neighbor(chosenIndex, neighborDuration, up, interval);
+            this.neighbor(chosenIndex, firstDuration, up, interval);
             ^(RandomNeighborChoice(chosenIndex,up));
         };
     }
@@ -322,20 +328,28 @@ TTLine {
     The duration of the inserted notes are all whole notes.
     Does nothing + returns nil if the target line has no valid places to insert. Otherwise, returns
     RandomStepMotionChoice indicating the choice. The duration of the notes inserted are all whole notes.
-    Limit means only step motions that would insert <= limit notes will be performed.
+    beats means only step motions that would insert <= beats beats will be inserted
     */
-    randomStepMotionInsert {|limit|
-        var validIndices = this.validStepMotionInserts(limit);
+    randomStepMotionInsert {|beats|
+        var validIndices = this.validStepMotionInserts(beats);
         if (validIndices.notEmpty) {
             var chosenIndex = validIndices.choose;
-            var startNote = lineNotes[chosenIndex].note;
-            var endNote = lineNotes[chosenIndex+1].note;
+            var startLineNote = lineNotes[chosenIndex];
+            var startNote = startLineNote.note;
+            var endLineNote = lineNotes[chosenIndex+1];
+            var endNote = endLineNote.note;
             var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key, type).lineNotes;
+            var result;
+            // restore the original durations of the start / end note because the counterPointStepMotion puts them
+            // at whole note
+            stepMotionLineNotes[0] = startLineNote;
+            stepMotionLineNotes[stepMotionLineNotes.size-1] = endLineNote;
+
             // I can't find a way to insert one list into the other at a specific place, so this will have to do instead...
             // start with the run up to the startNote, minus the start note itself since its already included in the
             // step motion line
             // TODO: maybe a more efficient way to do this - this creates quite a few "intermediate" copies...
-            var result = if (chosenIndex > 0) { lineNotes.copyRange(0,chosenIndex-1) } { List[] };
+            result = if (chosenIndex > 0) { lineNotes.copyRange(0,chosenIndex-1) } { List[] };
             // insert step motion line
             result.addAll(stepMotionLineNotes);
             // insert everything after, excluding the endNote from the original line since it's already at the end
@@ -344,11 +358,13 @@ TTLine {
                 result.addAll(lineNotes.copyRange(chosenIndex+2,lineNotes.size-1))
             };
             lineNotes = result;
+            // restore the original durations of the start / end note
             ^(RandomStepMotionChoice(chosenIndex));
         };
     }
 
     /*
+    Adds 4 beats.
     randomly repeats a triad note in the line, always using a whole note
     for the new note. Returns RandomTriadRepeatChoice indicating the choice, or nil if no valid target.
     */
@@ -413,13 +429,23 @@ TTLine {
     */
     *randomPrimaryLine {|key, octave, beats|
         var line = this.basicStepMotion(key, \primary, octave, #[3,5,8].choose);
+        // TODO: This could end up infinite loop if no operations can increase the length
         while { line.beats < beats } {
+            var choice = (0..3).choose;
+            var curBeats = line.beats;
+            ("beats before" + curBeats).postln;
+            ("chose" + choice).postln;
             [
+                //+4
                 {line.randomTriadRepeat},
+                //+4
                 {line.randomNeighbor},
+                //=
                 {line.randomTriadInsert},
+                //(0-beats) (should be multiple of 4)
                 {line.randomStepMotionInsert(beats - line.beats)}
-            ].choose.value;
+            ][choice].value;
+            ("added beats" + (line.beats - curBeats)).postln;
         };
         ^line;
     }
@@ -430,12 +456,14 @@ TTLine {
     *randomSecondaryLine{|key, octave, beats|
         var line = this.randomSecondaryBasicStructure(key, octave, beats);
         while { line.beats < beats } {
+            var choice = (0..3).choose;
+            ("beats" + beats).postln;
             [
                 {line.randomTriadRepeat},
                 {line.randomNeighbor},
                 {line.randomTriadInsert},
                 {line.randomStepMotionInsert(beats - line.beats)}
-            ].choose.value;
+            ][choice].value;
         };
         ^line;
     }
@@ -463,7 +491,7 @@ TTLine {
     
     firstOctave is the octave to use for the first note
     */
-    *randomSecondaryBasicStructure{|key,firstOctave,limit|
+    *randomSecondaryBasicStructure{|key,firstOctave,beats|
         var chosenFirstDegree = #[0,2,4].choose;
         var chosenFirstNote = key.scale(firstOctave)[chosenFirstDegree];
         var chosenFinalNote = key.validSecondaryEndingNote(chosenFirstNote).choose;
@@ -472,7 +500,7 @@ TTLine {
             if (chosenFirstNote == chosenFinalNote) {
                 line.randomNeighbor;
             } {
-                line.randomStepMotionInsert(limit);
+                line.randomStepMotionInsert(beats);
             }
         };
         ^line;
