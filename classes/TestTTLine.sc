@@ -3,6 +3,7 @@ TestTTLine : UnitTest {
     classvar <aMinorKey;
 
     *initClass {
+        Class.initClassTree(TonalPitchClassSymbol);
         cKey = Key(\c, true);
         aMinorKey = Key(\a, false);
     }
@@ -493,7 +494,6 @@ TestTTLine : UnitTest {
         ], cKey, \primary);
         thisThread.randSeed = 7;
         line = TTLine.randomPrimaryLine(cKey, 4, 32);
-        line.postln;
         this.assert(line == expected); 
     }
 

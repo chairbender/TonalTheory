@@ -2,6 +2,7 @@ TestKey : UnitTest {
     classvar <cKey;
 
     *initClass {
+        Class.initClassTree(TonalPitchClassSymbol);
         cKey = Key(\c, true);
     }
 

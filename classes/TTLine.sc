@@ -233,9 +233,6 @@ TTLine {
             var curNote = lineNotes[i].note;
             var nextNote = lineNotes[i+1].note;
             var interval = curNote.compoundIntervalTo(nextNote);
-            curNote.postln;
-            nextNote.postln;
-            interval.postln;
 
 
             if ((((interval.intervalNumber - 2)*4) <= beats) &&
@@ -429,23 +426,15 @@ TTLine {
     */
     *randomPrimaryLine {|key, octave, beats|
         var line = this.basicStepMotion(key, \primary, octave, #[3,5,8].choose);
-        // TODO: This could end up infinite loop if no operations can increase the length
         while { line.beats < beats } {
             var choice = (0..3).choose;
             var curBeats = line.beats;
-            ("beats before" + curBeats).postln;
-            ("chose" + choice).postln;
             [
-                //+4
                 {line.randomTriadRepeat},
-                //+4
                 {line.randomNeighbor},
-                //=
                 {line.randomTriadInsert},
-                //(0-beats) (should be multiple of 4)
                 {line.randomStepMotionInsert(beats - line.beats)}
             ][choice].value;
-            ("added beats" + (line.beats - curBeats)).postln;
         };
         ^line;
     }
@@ -457,7 +446,6 @@ TTLine {
         var line = this.randomSecondaryBasicStructure(key, octave, beats);
         while { line.beats < beats } {
             var choice = (0..3).choose;
-            ("beats" + beats).postln;
             [
                 {line.randomTriadRepeat},
                 {line.randomNeighbor},

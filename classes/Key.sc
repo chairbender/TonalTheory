@@ -7,10 +7,21 @@ Key {
     var <tonicTPC;
     // boolean - major (true) or minor (false)
     var <isMajor;
-    
+
+    // degrees of the key as an array of TPCs
+    var <degrees;
+    // degrees with no alterations
+    var <naturalDegrees;
 
     *new { |tonicTPC, isMajor|
-        ^super.newCopyArgs(tonicTPC, isMajor);
+        var degrees = if (isMajor) {
+            DiatonicCollection.ofRoot(tonicTPC);
+        } {
+            // construct the minor from the relative major
+            DiatonicCollection.ofRoot(Key.relativeMajorTonicTPC(tonicTPC,isMajor)).rotate(2)
+        };
+        var naturalDegrees = degrees.collect({|degree| degree.natural});
+        ^super.newCopyArgs(tonicTPC, isMajor, degrees, naturalDegrees);
     }
 
     == { arg that; ^this.compareObject(that, #[\tonicTPC, \isMajor]) }
@@ -28,29 +39,11 @@ Key {
     }
 
     /*
-    Returns the degrees of the Key as an array of TPCs
-    */
-    degrees {
-        if (isMajor) {
-            ^DiatonicCollection.ofRoot(tonicTPC);
-        };
-        // construct the minor from the relative major
-        ^(DiatonicCollection.ofRoot(this.relativeMajorTonicTPC).rotate(2));
-    }
-
-    /*
-    natural degrees of the scale (i.e. no alterations), useful for some methods internally
-    */
-    naturalDegrees {
-        ^(this.degrees.collect({|degree| degree.natural}));
-    }
-
-    /*
     Just like degrees, but converted to the notes of a single-octave scale starting on the indicated octave.
     */
     scale { |octave|
         var curOctave = octave;
-        ^(this.degrees.collect({|tpc, i| 
+        ^(degrees.collect({|tpc, i| 
             if (i != 0 && tpc.natural == \c) {
                 curOctave = curOctave + 1;
             };
@@ -64,7 +57,7 @@ Key {
     octave change occurs (would be 0 for c major).
     */
     cIndex { 
-        ^this.naturalDegrees.indexOf(\c);
+        ^naturalDegrees.indexOf(\c);
     }
 
     /*
@@ -106,7 +99,7 @@ Key {
     this class which assume the note is in the key.
     */
     containsNote { |note|
-        ^(this.degrees.includes(note.tpc))
+        ^(degrees.includes(note.tpc))
     }
 
     /*
@@ -117,11 +110,7 @@ Key {
     Apologies!
     */
     noteDegree { |note|
-        ^(this.naturalDegrees.indexOf(note.tpc.natural));
-        //var octave = this.scaleOctave(note);
-        //var scale = this.scale(octave);
-        //^(scale.detect({|scaleNote| note.tpc.natural == scaleNote.tpc.natural })); 
-        //^(scale.indexOf(note));
+        ^(naturalDegrees.indexOf(note.tpc.natural));
     }
 
     /*
@@ -130,7 +119,7 @@ Key {
     For example in the key of c major, passing \fs would return \f.
     */
     unalteredNote { |note|
-        ^(this.degrees.detect({ |degree|
+        ^(degrees.detect({ |degree|
             degree.letterStepsBetween(note.tpc) == 0
         }).asNote(note.octave));
     }
@@ -142,7 +131,7 @@ Key {
     noteAtScaleIndex { |scaleIndex|
         var octave = scaleIndex.div(7);
         var degree = scaleIndex % 7;
-        ^(this.scale(octave)[degree]);
+        ^(degrees[degree].asNote(octave));
     }
 
     /*
@@ -185,11 +174,15 @@ Key {
     For example, given \a, returns \c.
     */
     relativeMajorTonicTPC{
+        ^Key.relativeMajorTonicTPC(tonicTPC, isMajor);
+    }
+
+    *relativeMajorTonicTPC {|tonicTPC,isMajor|
         if (isMajor) {
             Error("this is a major key, can only compute relative major of a minor key").throw;
         } {
             ^(tonicTPC.asNote(4).intervalAbove(\m3).tpc);
-        }
+        } 
     }
 
     /*
