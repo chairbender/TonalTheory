@@ -256,7 +256,7 @@ TestTTLine : UnitTest {
             ],
             key, \primary);
         this.assert(line.validTriadInsertsBefore(0) == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
-        this.assert(line.validTriadInsertsBefore(1) == [\g3, \c4, \e4, \g4, \c5]);
+        this.assert(line.validTriadInsertsBefore(1) == [\g3, \c4, \e4, \g4, \c5, \e5, \g5]);
     }
 
     test_validTriadInserts {
@@ -269,7 +269,7 @@ TestTTLine : UnitTest {
             key, \primary); 
         var dict = line.validTriadInserts;
         this.assert(dict[0] == [\c3, \e3, \g3, \c4, \e4, \g4, \c5]);
-        this.assert(dict[1] == [\g3, \c4, \e4, \g4, \c5]); 
+        this.assert(dict[1] == [\g3, \c4, \e4, \g4, \c5, \e5, \g5]); 
     }
 
     // TODO: not sure if these are actually correct
@@ -478,6 +478,21 @@ TestTTLine : UnitTest {
         this.assert(line == expected); 
     }
 
+    test_randomBasicArpeggiation_2 {
+        var choice;
+        var line ;
+        var expected = TTLine(List[
+            LineNote(\a4, 1),
+            LineNote(\c2, 1),
+            LineNote(\e3, 1),
+            LineNote(\a3, 1)
+        ], aMinorKey, \lower);
+        thisThread.randSeed = 9;
+        line = TTLine.randomBasicArpeggiation(4,aMinorKey);
+        this.assert(line == expected); 
+    }
+
+
     test_randomPrimaryLine {
         var choice;
         var line ;
@@ -486,7 +501,7 @@ TestTTLine : UnitTest {
             LineNote(\e4, 1%/2),
             LineNote(\d4, 1%/2),
             LineNote(\e4, 1),
-            LineNote(\c5, 1),
+            LineNote(\e5, 1),
             LineNote(\g4, 1),
             LineNote(\d4, 1),
             LineNote(\g3, 1),

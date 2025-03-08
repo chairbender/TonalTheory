@@ -131,7 +131,8 @@ Key {
     noteAtScaleIndex { |scaleIndex|
         var octave = scaleIndex.div(7);
         var degree = scaleIndex % 7;
-        ^(degrees[degree].asNote(octave));
+        var adjustedOctave = if ((this.cIndex == 0) || (degree < this.cIndex)) { octave } { octave + 1};
+        ^(degrees[degree].asNote(adjustedOctave));
     }
 
     /*

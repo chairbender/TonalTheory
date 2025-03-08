@@ -17,7 +17,7 @@ TestTTLine.run;
 
 (
     // generate 4 lines, n measures long
-    n = 64;
+    n = 4;
     ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3]);
     // prepare for patterns
     ~midinotes = ~lines.collect({|line| line.midinotes});
@@ -46,9 +46,13 @@ TestTTLine.run;
 ~lines.do({|line| line.beats.postln});
 
 (
-    ~line = TTLine.randomSecondaryLine(Key(\a, false), 4, 4*16);
+    ~line = TTLine.randomLowerLine(Key(\a, false), 4, 4*16);
     ~line.postln;
     ~line.beats.postln;
+)
+(
+    ~line = TTLine.randomBasicArpeggiation(4, Key(\a, false));
+    ~line.postln;
 )
 
 (

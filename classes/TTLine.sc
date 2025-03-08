@@ -181,11 +181,12 @@ TTLine {
         var validTriads = key.triadPitchesNear(note);
         // check for consonance with the note that will be before and after the triad insert
         ^(validTriads.select({ |triadNote|
-            var prevInterval = prevNote.compoundIntervalTo(triadNote);
-            var afterInterval = note.compoundIntervalTo(triadNote); 
+            var prevInterval = prevNote.simpleIntervalTo(triadNote);
+            var afterInterval = note.simpleIntervalTo(triadNote); 
+            var afterCompoundInterval = note.compoundIntervalTo(triadNote);
             prevInterval.isConsonant(this.isLowerLine) &&
                 afterInterval.isConsonant(this.isLowerLine) &&
-                (afterInterval.intervalNumber <= 8);
+                (afterCompoundInterval.intervalNumber <= 8);
         }));
     }
 
@@ -511,9 +512,10 @@ TTLine {
         // otherwise we can choose whatever - it won't be used by basicArpeggiation.
         var insertNote = if (firstNote.compoundIntervalTo(middleNote).intervalNumber > 5) {
             // randomly pick an insert note because basicArpeggiation will use it
-            key.validTriadInsertsBetween(firstNote, middleNote, \lower).choose
+            var chosenInsert = key.validTriadInsertsBetween(firstNote, middleNote, \lower).choose;
+            if (chosenInsert.isNil) { Error("chose nil insert, this should never happe").throw};
+            chosenInsert
         } { \c4 };
-        // TODO: LEFT OFF - write test for this
         ^(this.basicArpeggiation(key, firstOctave, octaveOffset, chosenMiddleUp, insertNote))
     }
 

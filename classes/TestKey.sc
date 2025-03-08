@@ -37,7 +37,7 @@ TestKey : UnitTest {
     }
 
     test_validTriadInsertsBetween {
-        this.assert(Key(\c, true).validTriadInsertsBetween(\c4, \g4, \primary) == [\g3, \c4, \e4, \g4, \c5]);
+        this.assert(Key(\c, true).validTriadInsertsBetween(\c4, \g4, \primary) == [\g3, \c4, \e4, \g4, \c5, \e5, \g5]);
     }
 
     test_unalteredNote {
