@@ -16,17 +16,11 @@ TestTTLine.run;
 
 // simple example
 (
+    TempoClock.default.tempo = 414/60;
     // generate 4 lines, n measures long
     n = 4;
     ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3]);
-    
-    //prep the patterns
-    ~patterns = TTLine.pBinds(~lines);
-
-    // play
-    TempoClock.default.tempo = 414/60;
-    Ppar(~patterns).play;
-
+    TTLine.play(~lines);
 )
 
 

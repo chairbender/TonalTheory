@@ -409,6 +409,14 @@ TTLine {
         };
     }
 
+
+    /*
+    Given an array of TTLines, plays them in a basic way.
+    */
+    *play{|lines|
+        Ppar(this.pBinds(lines)).play;
+    }
+
     /*
     Given an array of TTLines, returns an array of Pbinds, representing a basic pattern built from each of the lines.
     Passing this to Ppar would play the counterpoint as written in a very basic manner.
@@ -423,6 +431,7 @@ TTLine {
                 \midinote, Pseq(line.midinotes)
             );
             if (sustain) { pat = Pbindf(pat, \sustain, Pseq(deltas))};
+            pat;
         }))
     }
 
