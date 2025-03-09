@@ -412,9 +412,18 @@ TTLine {
 
     /*
     Given an array of TTLines, plays them in a basic way.
+    Same args as Pattern.play (also same defaulting behavior)
     */
-    *play{|lines|
-        Ppar(this.pBinds(lines)).play;
+    *play{|lines, clock, protoEvent, quant|
+        this.pPar(lines).play(clock, protoEvent, quant);
+    }
+
+    /*
+    Just like pBinds, but wraps in a Ppar so they're ready to play in unison, without
+    actually playing them.
+    */
+    *pPar{|lines,sustain=true|
+        ^(Ppar(this.pBinds(lines,sustain)));
     }
 
     /*
@@ -433,6 +442,44 @@ TTLine {
             if (sustain) { pat = Pbindf(pat, \sustain, Pseq(deltas))};
             pat;
         }))
+    }
+
+    /*
+    More of a one-off toy than a utility.
+    Starts with a set of lines and iteratively mutates and auditions them after each
+    mutation.
+    key gives the key.
+    octaves is the octaves to use for each line (and the length of this also indicates the number of lines).
+    beats is the total number of beats to ultimately reach.
+    */
+    *evolve{|key, octaves, beats|
+        var lines = this.startLinesSameLength(key, octaves);
+        var waitTime, lastBeats, mutation;
+
+        while {lines[0].beats < beats} {
+            //play
+            this.play(lines, quant: 4);
+    
+            lastBeats = lines[0].beats.asFloat;
+    
+            // mutate
+            this.mutateAndMatchLength(lines,beats);
+    
+            // wait for next audition
+            ((lastBeats + 4) * (1 / TempoClock.default.tempo)).wait;
+        };
+        TTLine.play(lines, quant: 4);
+    }
+
+    /*
+    Choose a random mutation to apply to all lines. Apply it, and then
+    mutate all shorter lines until they are all the same length as the longest line.
+    Do not exceed "beats" beats.
+    */
+    *mutateAndMatchLength{|lines,beats|
+        var mutation = this.chooseMutation(beats);
+        lines.do(mutation);
+        this.mutateUntilSameLength(lines);
     }
 
     /*
@@ -460,7 +507,19 @@ TTLine {
     }
 
     /*
+    Just like startLines, but if lines end up not same length, mutates shorter lines
+    until they match the length of the longest line.
+    */
+    *startLinesSameLength{|key, octaves|
+        var lines = this.startLines(key, octaves);
+        this.mutateUntilSameLength(lines);
+        ^lines;
+    }
+
+    /*
     like randomCounterPointLines but generates only the starting line for each line type.
+    The lines are not guaranteed to be the same length - use startLinesSameLength instead if you
+    want that.
     Apply further mutations yourself, such as using chooseMutation to choose a mutation, then
     applying it to this line (and repeating this process).
     */
