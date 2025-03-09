@@ -17,31 +17,17 @@ TestTTLine.run;
 // simple example
 (
     // generate 4 lines, n measures long
-    n = 128;
+    n = 4;
     ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3]);
-    // prepare for patterns
-    ~midinotes = ~lines.collect({|line| line.midinotes});
-    ~deltas = ~lines.collect({|line| line.deltas});
     
     //prep the patterns
-    ~patterns = ~midinotes.collect({|notes,i|
-        Pbind(
-            \delta, Pseq(~deltas[i]),
-            \sustain, Pseq(~deltas[i]),
-            \midinote, Pseq(notes)
-        )
-    });
-
-    ~patterns.postln;
+    ~patterns = TTLine.pBinds(~lines);
 
     // play
     TempoClock.default.tempo = 414/60;
     Ppar(~patterns).play;
 
 )
-~patterns[0].play
-~lines[3].postln
-~lines.do({|line| line.beats.postln});
 
 
 // iterative building
@@ -52,9 +38,7 @@ TestTTLine.run;
     var mutation;
     var max = 0;
     ~lines = TTLine.startLines(Key(\a, false), [5,4,4,3]);
-    ~lines.do({|line| if (line.beats > max) { max = line.beats}});
-    ~lines.do({|line| line.mutateUntilBeats(max)});
-    // TODO: need to "catch up" the shorter lines - add a "mutateUntilBeats" method.
+    TTLine.mutateUntilSameLength(~lines);
     TempoClock.default.tempo = 414/60;
 
     while {~lines[0].beats < beats} {
@@ -72,7 +56,8 @@ TestTTLine.run;
             )
         });
         //play
-        // TODO: precalculate end time or use some async mechanism, so we dont busy-wait until we need to
+        // TODO: precalculate end time or use some async mechanism, so we dont busy-wait until we need to and we start
+        // exactly on time
         Ppar(~patterns).play;
 
         // wait
@@ -84,11 +69,8 @@ TestTTLine.run;
         ~lines.do(mutation);
         ~lines[0].postln;
         (~lines[0].beats).postln;
+        TTLine.mutateUntilSameLength(~lines);
 
-        // TODO: consolidate "catch up" as well into a method
-        // catch up shorter lines
-        ~lines.do({|line| if (line.beats > max) { max = line.beats}});
-        ~lines.do({|line| line.mutateUntilBeats(max)});
     };
     ~midinotes = ~lines.collect({|line| line.midinotes});
     ~deltas = ~lines.collect({|line| line.deltas});

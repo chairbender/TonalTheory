@@ -329,7 +329,7 @@ TTLine {
     beats means only step motions that would insert <= beats beats will be inserted
     */
     randomStepMotionInsert {|beats|
-        var validIndices = this.validStepMotionInserts(beats);
+        var validIndices = this.validStepMotionInserts(beats - this.beats);
         if (validIndices.notEmpty) {
             var chosenIndex = validIndices.choose;
             var startLineNote = lineNotes[chosenIndex];
@@ -410,6 +410,33 @@ TTLine {
     }
 
     /*
+    Given an array of TTLines, returns an array of Pbinds, representing a basic pattern built from each of the lines.
+    Passing this to Ppar would play the counterpoint as written in a very basic manner.
+    The events in the pattern only have \delta, \sustain (unless sustain=false), and \midinote set. Any additional customizations
+    could be done using Pbindf / Pchain / Pset etc...
+    */
+    *pBinds{|lines,sustain=true|
+        ^(lines.collect({|line|
+            var deltas = line.deltas;
+            var pat = Pbind(
+                \delta, Pseq(deltas),
+                \midinote, Pseq(line.midinotes)
+            );
+            if (sustain) { pat = Pbindf(pat, \sustain, Pseq(deltas))};
+        }))
+    }
+
+    /*
+    Given an array of TTLines, mutates lines as needed, randomly, until they are all the same number of beats
+    as the line with the longes number of beats
+    */
+    *mutateUntilSameLength{|lines|
+        var max = -1;
+        lines.do({|line| if (line.beats > max) { max = line.beats}});
+        lines.do({|line| line.mutateUntilBeats(max)});
+    }
+
+    /*
     Returns a function that applies a mutation to a line, ensuring the function will not
     generate a line with more than the specified number of beats.
     This can then be applied to a line for e.g. via result.value(someLine);
@@ -471,7 +498,10 @@ TTLine {
     and beats determines the total beats of the resulting line
     */
     *randomPrimaryLine {|key, octave, beats|
-        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, #[3,5,8].choose));
+        var allowedFinalNotes = [3,5,8].select({|interval|
+            (interval * 4) <= beats
+        });
+        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, allowedFinalNotes.choose, beats));
     }
 
     /*

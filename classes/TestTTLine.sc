@@ -512,4 +512,10 @@ TestTTLine : UnitTest {
         this.assert(line == expected); 
     }
 
+    test_randomSecondaryLine_respectsBeatLimit {
+        thisThread.randSeed = 76;
+        line = TTLine.randomSecondaryLine(aMinorKey, 4, 16);
+        this.assert(line.beats == 16);
+    }
+
 }
