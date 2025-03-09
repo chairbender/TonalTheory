@@ -28,6 +28,26 @@ TestTTLine.run;
     TTLine.evolve(Key(\c, true), [5,4,4,3], 8*4);
 )
 
+// "key progression"
+(
+    var beatsPerKey = 4*4;
+    var octaves = [5,4,4,3];
+    var keyProg = [
+        // I
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\c, true), octaves),
+        // V
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\g, true), octaves),
+        // vi
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\a, false), octaves),
+        // IV
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\f, true), octaves)
+    ];
+    TempoClock.default.tempo = 414/60;
+    Pseq(keyProg.collect({|lines|
+        TTLine.pPar(lines)
+    }), inf).play;
+)
+
 (
     TempoClock.default.tempo = 84/60;
     
