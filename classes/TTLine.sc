@@ -573,7 +573,8 @@ TTLine {
     */
     *evolve{|key, octaves, beats, weights=([0.25,0.25,0.25,0.25])|
         var lines = this.startLinesSameLength(key, octaves, weights);
-        var waitTime, lastBeats, mutation;
+        var normWeights = this.normalizeWeights(lines, weights);
+        var waitTime, lastBeats, mutation, chosenLineIdx;
 
         while {lines[0].beats < beats} {
             //play
@@ -582,30 +583,15 @@ TTLine {
             lastBeats = lines[0].beats.asFloat;
     
             // mutate
-            this.mutateAndMatchLength(lines,beats,weights);
+            // pick a line to pick a "mutation type" from, then catch up the others
+            chosenLineIdx = (0..3).choose;
+            lines[chosenLineIdx].mutate(beats, normWeights[chosenLineIdx]);
+            this.mutateUntilSameLength(lines,normWeights);
     
             // wait for next audition
             ((lastBeats + 4) * (1 / TempoClock.default.tempo)).wait;
         };
         TTLine.play(lines, quant: 4);
-    }
-
-    /*
-    Choose a random mutation to apply to all lines. Apply it, and then
-    mutate all shorter lines until they are all the same length as the longest line.
-    Do not exceed "beats" beats.
-    weights sets the weightings to use when choosing (see mutate).
-    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
-    array per line, and those will be used as the weights for that line only. For example
-    [
-        [] line 1 weights
-        [] line 2 wieghts
-        [] line 3 weights
-        [] line 4 weights
-    ]
-    */
-    *mutateAndMatchLength{|lines,beats,weights=([0.25,0.25,0.25,0.25])|
-        this.mutateUntilSameLength(lines, this.normalizeWeights(lines,weights));
     }
 
     /*
