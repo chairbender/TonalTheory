@@ -402,10 +402,11 @@ TTLine {
 
     /*
     Randomly mutate the line until it reaches the indicated number of beats
+    weights sets the weightings to use when choosing (see *chooseMutation)
     */
-    mutateUntilBeats{|beats|
+    mutateUntilBeats{|beats,weights=([0.25,0.25,0.25,0.25])|
         while {this.beats < beats} {
-            TTLine.chooseMutation(beats).value(this);
+            TTLine.chooseMutation(beats, weights).value(this);
         };
     }
 
@@ -451,9 +452,18 @@ TTLine {
     key gives the key.
     octaves is the octaves to use for each line (and the length of this also indicates the number of lines).
     beats is the total number of beats to ultimately reach.
+    weights sets the weightings to use when choosing (see *chooseMutation).
+    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
+    array per line, and those will be used as the weights for that line only. For example
+    [
+        [] line 1 weights
+        [] line 2 wieghts
+        [] line 3 weights
+        [] line 4 weights
+    ] 
     */
-    *evolve{|key, octaves, beats|
-        var lines = this.startLinesSameLength(key, octaves);
+    *evolve{|key, octaves, beats, weights=([0.25,0.25,0.25,0.25])|
+        var lines = this.startLinesSameLength(key, octaves, weights);
         var waitTime, lastBeats, mutation;
 
         while {lines[0].beats < beats} {
@@ -463,7 +473,7 @@ TTLine {
             lastBeats = lines[0].beats.asFloat;
     
             // mutate
-            this.mutateAndMatchLength(lines,beats);
+            this.mutateAndMatchLength(lines,beats,weights);
     
             // wait for next audition
             ((lastBeats + 4) * (1 / TempoClock.default.tempo)).wait;
@@ -475,44 +485,81 @@ TTLine {
     Choose a random mutation to apply to all lines. Apply it, and then
     mutate all shorter lines until they are all the same length as the longest line.
     Do not exceed "beats" beats.
+    weights sets the weightings to use when choosing (see *chooseMutation).
+    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
+    array per line, and those will be used as the weights for that line only. For example
+    [
+        [] line 1 weights
+        [] line 2 wieghts
+        [] line 3 weights
+        [] line 4 weights
+    ]
     */
-    *mutateAndMatchLength{|lines,beats|
-        var mutation = this.chooseMutation(beats);
-        lines.do(mutation);
-        this.mutateUntilSameLength(lines);
+    *mutateAndMatchLength{|lines,beats,weights=([0.25,0.25,0.25,0.25])|
+        this.mutateUntilSameLength(lines, this.normalizeWeights(lines,weights));
+    }
+
+    /*
+    expand weights to match lines size if it's 1d, otherwise do nothing.
+    */
+    *normalizeWeights{|lines,weights=([0.25,0.25,0.25,0.25])|
+        ^(if (weights.maxSizeAtDepth(1) == 1) {
+            weights!(lines.size)
+        } { weights });
     }
 
     /*
     Given an array of TTLines, mutates lines as needed, randomly, until they are all the same number of beats
     as the line with the longes number of beats
+    weights sets the weightings to use when choosing (see *chooseMutation).
+    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
+    array per line, and those will be used as the weights for that line only. For example
+    [
+        [] line 1 weights
+        [] line 2 wieghts
+        [] line 3 weights
+        [] line 4 weights
+    ]
     */
-    *mutateUntilSameLength{|lines|
+    *mutateUntilSameLength{|lines,weights=([0.25,0.25,0.25,0.25])|
         var max = -1;
+        var normWeights = this.normalizeWeights(weights);
         lines.do({|line| if (line.beats > max) { max = line.beats}});
-        lines.do({|line| line.mutateUntilBeats(max)});
+        lines.do({|line,i| line.mutateUntilBeats(max,normWeights[i])});
     }
 
     /*
     Returns a function that applies a mutation to a line, ensuring the function will not
     generate a line with more than the specified number of beats.
     This can then be applied to a line for e.g. via result.value(someLine);
+    Weights sets the probabilities to use when choosing. Must sum to 1.0.
+    There are 4 choices (in order): triad repeat, neighbor, triad insert, step motion insert
     */
-    *chooseMutation{|beats| 
+    *chooseMutation{|beats, weights=([0.25,0.25,0.25,0.25])| 
         ^([
             {|line| line.randomTriadRepeat},
             {|line| line.randomNeighbor},
             {|line| line.randomTriadInsert},
             {|line| line.randomStepMotionInsert(beats - line.beats)}
-        ].choose);
+        ].wchoose(weights));
     }
 
     /*
     Just like startLines, but if lines end up not same length, mutates shorter lines
     until they match the length of the longest line.
+    weights sets the weightings to use when choosing (see *chooseMutation).
+    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
+    array per line, and those will be used as the weights for that line only. For example
+    [
+        [] line 1 weights
+        [] line 2 wieghts
+        [] line 3 weights
+        [] line 4 weights
+    ]
     */
-    *startLinesSameLength{|key, octaves|
+    *startLinesSameLength{|key, octaves, weights=([0.25,0.25,0.25,0.25])|
         var lines = this.startLines(key, octaves);
-        this.mutateUntilSameLength(lines);
+        this.mutateUntilSameLength(lines, weights);
         ^lines;
     }
 
@@ -540,20 +587,30 @@ TTLine {
     and the size determines the number of lines generated. The first line is
     always primary, and last line is always lower. All other lines are secondary.
     key determines the key of the counterpoint.
+    weights sets the weightings to use when choosing (see *chooseMutation).
+    If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
+    array per line, and those will be used as the weights for that line only. For example
+    [
+        [] line 1 weights
+        [] line 2 wieghts
+        [] line 3 weights
+        [] line 4 weights
+    ]
     */
-    *randomCounterpointLines{|beats, key, octaves|
+    *randomCounterpointLines{|beats, key, octaves, weights=([0.25,0.25,0.25,0.25])|
+        var normWeights = this.normalizeWeights(weights);
         ^(octaves.collect({|octave, i|
             switch (i,
-                0, { this.randomPrimaryLine(key, octave, beats) },
-                (octaves.size-1), { this.randomLowerLine(key, octave, beats) },
-                { this.randomSecondaryLine(key, octave, beats) }
+                0, { this.randomPrimaryLine(key, octave, beats,normWeights[i]) },
+                (octaves.size-1), { this.randomLowerLine(key, octave, beats,normWeights[i]) },
+                { this.randomSecondaryLine(key, octave, beats,normWeights[i]) }
             )
         }));
     }
 
-    *randomLine {|beats, line|
+    *randomLine {|beats, line, weights=([0.25,0.25,0.25,0.25])|
         while { line.beats < beats } {
-            this.chooseMutation(beats).value(line);
+            this.chooseMutation(beats, weights).value(line);
         };
         ^line; 
     }
@@ -564,26 +621,27 @@ TTLine {
     octave, randomly performing any allowed operation some number of times.
     key-vector indicates the key, octave indicates the octave of the starting note,
     and beats determines the total beats of the resulting line
+    weights sets the weightings to use when choosing mutations (see *chooseMutation).
     */
-    *randomPrimaryLine {|key, octave, beats|
+    *randomPrimaryLine {|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
         var allowedFinalNotes = [3,5,8].select({|interval|
             (interval * 4) <= beats
         });
-        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, allowedFinalNotes.choose, beats));
+        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, allowedFinalNotes.choose, beats), weights);
     }
 
     /*
     Just like randomPrimaryLine, but for a secondary line
     */
-    *randomSecondaryLine{|key, octave, beats|
-        ^this.randomLine(beats, this.randomSecondaryBasicStructure(key, octave, beats));
+    *randomSecondaryLine{|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
+        ^this.randomLine(beats, this.randomSecondaryBasicStructure(key, octave, beats), weights);
     }
 
     /*
     Line randomPrimaryLine, but generates a lower line.
     */
-    *randomLowerLine {|key, octave, beats|
-        ^this.randomLine(beats, this.randomBasicArpeggiation(octave, key));
+    *randomLowerLine {|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
+        ^this.randomLine(beats, this.randomBasicArpeggiation(octave, key), weights);
     }
 
     /*

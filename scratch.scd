@@ -55,4 +55,14 @@ TestTTLine.run;
         \midinote, Pseq([60, 61, 62]),
         \dur, 0.25
     ).play;
-    )
+)
+
+(
+    var a = [1,2,3];
+    var b = [[1,2,3],[4,5,6]];
+    a.maxSizeAtDepth(0).postln;
+    a.maxSizeAtDepth(1).postln;
+    b.maxSizeAtDepth(0).postln;
+    b.maxSizeAtDepth(1);
+
+)
