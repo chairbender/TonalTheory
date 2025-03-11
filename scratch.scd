@@ -18,8 +18,9 @@ TestTTLine.run;
 (
     TempoClock.default.tempo = 414/60;
     // generate 4 lines, n measures long
-    n = 4;
-    ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3]);
+    n = 16;
+    ~weights = [0.01, 0.97, 0.01, 0.01];
+    ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3], ~weights);
     TTLine.play(~lines);
 )
 
@@ -32,21 +33,23 @@ TestTTLine.run;
 (
     var beatsPerKey = 4*4;
     var octaves = [5,4,4,3];
+    var weights = [0.1, 0.7, 0.1, 0.1];
     var keyProg = [
         // I
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\c, true), octaves),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\c, true), octaves, weights),
         // V
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\g, true), octaves),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\g, true), octaves, weights),
         // vi
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\a, false), octaves),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\a, false), octaves, weights),
         // IV
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\f, true), octaves)
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\f, true), octaves, weights)
     ];
     TempoClock.default.tempo = 414/60;
-    Pseq(keyProg.collect({|lines|
+    ~p = Pseq(keyProg.collect({|lines|
         TTLine.pPar(lines)
     }), inf).play;
 )
+~p.stop;
 
 (
     TempoClock.default.tempo = 84/60;

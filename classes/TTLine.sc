@@ -533,7 +533,12 @@ TTLine {
     generate a line with more than the specified number of beats.
     This can then be applied to a line for e.g. via result.value(someLine);
     Weights sets the probabilities to use when choosing. Must sum to 1.0.
-    There are 4 choices (in order): triad repeat, neighbor, triad insert, step motion insert
+    There are 4 choices (in order): triad repeat, neighbor, triad insert, step motion insert.
+    triad repeat adds a whole note.
+    neighbor splits a note in half (preserving total line length in beats)
+    triad insert inserts a whole note
+    step motion insert inserts 1 or more whole notes
+    When the chosen choice has no valid options, nothing happens (it does not pick a different one).
     */
     *chooseMutation{|beats, weights=([0.25,0.25,0.25,0.25])| 
         ^([
