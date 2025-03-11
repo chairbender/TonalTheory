@@ -508,7 +508,6 @@ TestTTLine : UnitTest {
         ], cKey, \primary);
         thisThread.randSeed = 7;
         line = TTLine.randomPrimaryLine(cKey, 4, 32);
-        line.postln;
         this.assert(line == expected); 
     }
 

@@ -20,7 +20,7 @@ TestTTLine.run;
     // generate 4 lines, n measures long
     n = 16;
     ~weights = [0.01, 0.97, 0.01, 0.01];
-    ~lines = TTLine.randomCounterpointLines(4*n, Key(\a, false), [5,4,4,3], ~weights);
+    ~lines = TTLine.randomCounterpointLines(4*n, Key(\a), [5,4,4,3], ~weights);
     TTLine.play(~lines);
 )
 

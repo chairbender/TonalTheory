@@ -1,4 +1,9 @@
 /*
+Can also be constructed via Key(\c) for c minor or Key(\C) for c major (not specifying isMajor in the constructor)
+Because there are some relatively expensive methods in here that are called frequently, I opted to not
+provide this as a symbol extension (particularly due to the benefits of caching of degrees / naturalDegrees, which wouldn't
+be as feasible with a symbol-based class).
+
 A specific key, just as in normal music theory. It is defined by a tonic tonal pitch class and a mode.
 As a reminder, the mode indicates the tonic triad (I III V) of the scale of this key.
 */
@@ -14,14 +19,17 @@ Key {
     var <naturalDegrees;
 
     *new { |tonicTPC, isMajor|
-        var degrees = if (isMajor) {
+        var isReallyMajor = if (isMajor.isNil) {
+            "ABCDEFG".contains(tonicTPC.asString[0])
+        } { isMajor };
+        var degrees = if (isReallyMajor) {
             DiatonicCollection.ofRoot(tonicTPC);
         } {
             // construct the minor from the relative major
-            DiatonicCollection.ofRoot(Key.relativeMajorTonicTPC(tonicTPC,isMajor)).rotate(2)
+            DiatonicCollection.ofRoot(Key.relativeMajorTonicTPC(tonicTPC,isReallyMajor)).rotate(2)
         };
         var naturalDegrees = degrees.collect({|degree| degree.natural});
-        ^super.newCopyArgs(tonicTPC, isMajor, degrees, naturalDegrees);
+        ^super.newCopyArgs(tonicTPC, isReallyMajor, degrees, naturalDegrees);
     }
 
     == { arg that; ^this.compareObject(that, #[\tonicTPC, \isMajor]) }
@@ -205,4 +213,3 @@ Key {
             }));
     }
 }
-
