@@ -273,24 +273,28 @@ TTLine {
         var up = 0.5.coin;
 
         if (chosenIndex.isNil.not) {
-            var chosenNote = lineNotes[chosenIndex].note;
-            var chosenNoteDur = lineNotes[chosenIndex].duration;
-            var firstDuration = chosenNoteDur * (1 %/ 2);
-            var chosenNoteScaleIdx = key.scaleIndex(chosenNote);
-            var chosenNoteDegree = key.noteDegree(chosenNote);
-
-            // lower neighbor to the tonic in a minor key?
-            var interval = if (up.not && (chosenNoteDegree == 1) && (key.isMinor)) {
-                \m2
-            } {
-                // figure out the interval name we need to use to perform the operation
-                var offset = if (up) {1} {-1};
-                var neighborNote = key.noteAtScaleIndex(chosenNoteScaleIdx + offset);
-                chosenNote.compoundIntervalTo(neighborNote)
-            };
-            this.neighbor(chosenIndex, firstDuration, up, interval);
-            ^(RandomNeighborChoice(chosenIndex,up));
+            ^(this.neighbor_(chosenIndex, up))
         };
+    }
+
+    neighbor_{|chosenIndex, up|
+        var chosenNote = lineNotes[chosenIndex].note;
+        var chosenNoteDur = lineNotes[chosenIndex].duration;
+        var firstDuration = chosenNoteDur * (1 %/ 2);
+        var chosenNoteScaleIdx = key.scaleIndex(chosenNote);
+        var chosenNoteDegree = key.noteDegree(chosenNote);
+
+        // lower neighbor to the tonic in a minor key?
+        var interval = if (up.not && (chosenNoteDegree == 1) && (key.isMinor)) {
+            \m2
+        } {
+            // figure out the interval name we need to use to perform the operation
+            var offset = if (up) {1} {-1};
+            var neighborNote = key.noteAtScaleIndex(chosenNoteScaleIdx + offset);
+            chosenNote.compoundIntervalTo(neighborNote)
+        };
+        this.neighbor(chosenIndex, firstDuration, up, interval);
+        ^(RandomNeighborChoice(chosenIndex,up));
     }
 
     /*
@@ -309,10 +313,14 @@ TTLine {
             var validNeighborNotes = validInserts[chosenIndex];
             if (validNeighborNotes.notEmpty) {
                 var chosenNote = validNeighborNotes.choose;
-                lineNotes.insert(chosenIndex,LineNote(chosenNote,1));
-                ^(RandomTriadInsertChoice(chosenIndex,chosenNote));
+                ^(this.triadInsert_(chosenIndex, chosenNote));
             }
         };
+    }
+
+    triadInsert_{|chosenIndex,chosenNote|
+        lineNotes.insert(chosenIndex,LineNote(chosenNote,1));
+        ^(RandomTriadInsertChoice(chosenIndex,chosenNote));
     }
 
     /*
@@ -332,33 +340,37 @@ TTLine {
         var validIndices = this.validStepMotionInserts(beats - this.beats);
         if (validIndices.notEmpty) {
             var chosenIndex = validIndices.choose;
-            var startLineNote = lineNotes[chosenIndex];
-            var startNote = startLineNote.note;
-            var endLineNote = lineNotes[chosenIndex+1];
-            var endNote = endLineNote.note;
-            var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key, type).lineNotes;
-            var result;
-            // restore the original durations of the start / end note because the counterPointStepMotion puts them
-            // at whole note
-            stepMotionLineNotes[0] = startLineNote;
-            stepMotionLineNotes[stepMotionLineNotes.size-1] = endLineNote;
-
-            // I can't find a way to insert one list into the other at a specific place, so this will have to do instead...
-            // start with the run up to the startNote, minus the start note itself since its already included in the
-            // step motion line
-            // TODO: maybe a more efficient way to do this - this creates quite a few "intermediate" copies...
-            result = if (chosenIndex > 0) { lineNotes.copyRange(0,chosenIndex-1) } { List[] };
-            // insert step motion line
-            result.addAll(stepMotionLineNotes);
-            // insert everything after, excluding the endNote from the original line since it's already at the end
-            // of the inserted step motion
-            if (chosenIndex < (lineNotes.size-2)) {
-                result.addAll(lineNotes.copyRange(chosenIndex+2,lineNotes.size-1))
-            };
-            lineNotes = result;
-            // restore the original durations of the start / end note
-            ^(RandomStepMotionChoice(chosenIndex));
+            ^(this.stepMotionInsert_(chosenIndex))
         };
+    }
+
+    stepMotionInsert_{|chosenIndex|
+        var startLineNote = lineNotes[chosenIndex];
+        var startNote = startLineNote.note;
+        var endLineNote = lineNotes[chosenIndex+1];
+        var endNote = endLineNote.note;
+        var stepMotionLineNotes = TTLine.counterpointStepMotion(startNote, endNote, key, type).lineNotes;
+        var result;
+        // restore the original durations of the start / end note because the counterPointStepMotion puts them
+        // at whole note
+        stepMotionLineNotes[0] = startLineNote;
+        stepMotionLineNotes[stepMotionLineNotes.size-1] = endLineNote;
+
+        // I can't find a way to insert one list into the other at a specific place, so this will have to do instead...
+        // start with the run up to the startNote, minus the start note itself since its already included in the
+        // step motion line
+        // TODO: maybe a more efficient way to do this - this creates quite a few "intermediate" copies...
+        result = if (chosenIndex > 0) { lineNotes.copyRange(0,chosenIndex-1) } { List[] };
+        // insert step motion line
+        result.addAll(stepMotionLineNotes);
+        // insert everything after, excluding the endNote from the original line since it's already at the end
+        // of the inserted step motion
+        if (chosenIndex < (lineNotes.size-2)) {
+            result.addAll(lineNotes.copyRange(chosenIndex+2,lineNotes.size-1))
+        };
+        lineNotes = result;
+        // restore the original durations of the start / end note
+        ^(RandomStepMotionChoice(chosenIndex));
     }
 
     /*
@@ -370,12 +382,15 @@ TTLine {
         var validIndices = this.validTriadRepeats;
         if (validIndices.notEmpty) {
             var chosenIndex = validIndices.choose;
-            var chosenNote = lineNotes[chosenIndex].note;
-            // TODO: in the old code, I think the whole note was inserted BEFORE the existing note...
-            // but shouldn't it come after? That's what it's doing here. Check with the book.
-            lineNotes.insert(chosenIndex+1, LineNote(chosenNote,1));
-            ^(RandomTriadRepeatChoice(chosenIndex));
+            ^(this.triadRepeat_(chosenIndex));
+
         };
+    }
+
+    triadRepeat_{|chosenIndex|
+        var chosenNote = lineNotes[chosenIndex].note;
+        lineNotes.insert(chosenIndex+1, LineNote(chosenNote,1));
+        ^(RandomTriadRepeatChoice(chosenIndex));
     }
 
     /*
@@ -402,14 +417,108 @@ TTLine {
 
     /*
     Randomly mutate the line until it reaches the indicated number of beats
-    weights sets the weightings to use when choosing (see *chooseMutation)
+    weights sets the weightings to use when choosing (see mutate)
     */
     mutateUntilBeats{|beats,weights=([0.25,0.25,0.25,0.25])|
         while {this.beats < beats} {
-            TTLine.chooseMutation(beats, weights).value(this);
+            this.mutate(beats, weights);
         };
     }
 
+    /*
+    Returns a list of RandomChoice (RandomNeighborChoice, RandomStepMotionChoice, RandomTriadInsertChoice,
+    or RandomTriadRepeatChoice), representing all of the possible different mutations that could be performed
+    on the current line. Any of the given elements can then be performed via
+    calling mutate(randomChoice). Note that calling it would immediately invalidate the list, so you would need to call
+    validMutations again to get a new set of choices.
+    beats sets the max allowed total beats.
+    */
+    validMutations{|beats|
+        ^(if (this.beats < beats) {
+            var choices = List[];
+            var neighborIndices = this.validNeighborIndices;
+            var repeatIndices = this.validTriadRepeats;
+            var insertDict = this.validTriadInserts;
+            var stepMotionIndices = this.validStepMotionInserts(beats - this.beats);
+            neighborIndices.do{|i| 
+                choices.add(RandomNeighborChoice(i, true));
+                choices.add(RandomNeighborChoice(i, false));
+            };
+            repeatIndices.do{|i| 
+                choices.add(RandomTriadRepeatChoice(i))
+            };
+            insertDict.keysValuesDo{|index, validNotes| 
+                validNotes.do{|validNote|
+                    choices.add(RandomTriadInsertChoice(index, validNote))
+                }
+            };
+            stepMotionIndices.do{|i| 
+                choices.add(RandomStepMotionChoice(i))
+            };
+            ^choices;
+        } { List[] })
+    }
+
+    /*
+    Perform the mutation defined by randomChoice (see validMutations).
+    Undefined behavior if not a valid choice for the current line.
+    */
+    performMutation{|randomChoice|
+        case {randomChoice.isKindOf(RandomNeighborChoice)} {
+            this.neighbor_(randomChoice.index, randomChoice.up);
+        } { randomChoice.isKindOf(RandomStepMotionChoice)} {
+            this.stepMotionInsert_(randomChoice.index);
+        } { randomChoice.isKindOf(RandomTriadRepeatChoice)} {
+            this.triadRepeat_(randomChoice.index);
+        } { randomChoice.isKindOf(RandomTriadInsertChoice)} {
+            this.triadInsert_(randomChoice.index, randomChoice.note);
+        } { Error("unrecognized random choice class" + randomChoice.class).throw };
+    }
+
+    /*
+    Chooses and applies a valid random mutation to a line.
+    weights indicates the weightings to use for each kind of mutation.
+
+    There are 4 choices (in order): triad repeat, neighbor, triad insert, step motion insert.
+    triad repeat adds a whole note.
+    neighbor splits a note in half (preserving total line length in beats)
+    triad insert inserts a whole note
+    step motion insert inserts 1 or more whole notes
+
+    Unlike *chooseMutation, this will always perform a valid mutation (unless none exist at all for the line),
+    instead of potentially doing nothing if it chooses a mutation type that has no valid options.
+    */
+    mutate{|beats, weights=([0.25,0.25,0.25,0.25])| 
+        var mutationTypes = [RandomTriadRepeatChoice, RandomNeighborChoice, RandomTriadInsertChoice, RandomStepMotionChoice];
+        var choices = this.validMutations(beats);
+        var validChoiceTypes = Set[];
+        var chosenType;
+        var choice;
+        choices.do{|choice| validChoiceTypes.add(choice.class)};
+        if (validChoiceTypes.size == 0) {^nil};
+        if (validChoiceTypes.size != 4) {
+            // rebalance the weights to account for the nonexistent options
+            var surplus = 0;
+            var zeroCount = 0;
+            mutationTypes.do{|mutationType, i|
+                if (validChoiceTypes.includes(mutationType).not) {
+                    surplus = surplus + weights[i];
+                    weights[i] = 0;
+                };
+                if (weights[i] == 0) { zeroCount = zeroCount + 1 };
+            };
+            if (zeroCount == 4) {^nil};
+            weights.do{|weight,i| 
+                if (weight != 0) {
+                    weights[i] = weight + (surplus / (4 - zeroCount));
+                };
+            };
+        };
+        chosenType = mutationTypes.wchoose(weights);
+        choice = choices.select{|choice| choice.isKindOf(chosenType)}.choose;
+        this.performMutation(choice);
+        ^choice;
+    }
 
     /*
     Given an array of TTLines, plays them in a basic way.
@@ -452,7 +561,7 @@ TTLine {
     key gives the key.
     octaves is the octaves to use for each line (and the length of this also indicates the number of lines).
     beats is the total number of beats to ultimately reach.
-    weights sets the weightings to use when choosing (see *chooseMutation).
+    weights sets the weightings to use when choosing (see mutate).
     If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
     array per line, and those will be used as the weights for that line only. For example
     [
@@ -485,7 +594,7 @@ TTLine {
     Choose a random mutation to apply to all lines. Apply it, and then
     mutate all shorter lines until they are all the same length as the longest line.
     Do not exceed "beats" beats.
-    weights sets the weightings to use when choosing (see *chooseMutation).
+    weights sets the weightings to use when choosing (see mutate).
     If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
     array per line, and those will be used as the weights for that line only. For example
     [
@@ -511,7 +620,7 @@ TTLine {
     /*
     Given an array of TTLines, mutates lines as needed, randomly, until they are all the same number of beats
     as the line with the longes number of beats
-    weights sets the weightings to use when choosing (see *chooseMutation).
+    weights sets the weightings to use when choosing (see mutate).
     If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
     array per line, and those will be used as the weights for that line only. For example
     [
@@ -529,6 +638,8 @@ TTLine {
     }
 
     /*
+    Not recommended as it can choose options that have no valid targets, wasting time - use .mutate instead.
+
     Returns a function that applies a mutation to a line, ensuring the function will not
     generate a line with more than the specified number of beats.
     This can then be applied to a line for e.g. via result.value(someLine);
@@ -538,7 +649,8 @@ TTLine {
     neighbor splits a note in half (preserving total line length in beats)
     triad insert inserts a whole note
     step motion insert inserts 1 or more whole notes
-    When the chosen choice has no valid options, nothing happens (it does not pick a different one).
+    Keep in mind this has no knowledge of the line it is potentially being passed to, so it
+    may choose a mutation that has no valid options for the given line (in which case nothing will be done)
     */
     *chooseMutation{|beats, weights=([0.25,0.25,0.25,0.25])| 
         ^([
@@ -549,10 +661,11 @@ TTLine {
         ].wchoose(weights));
     }
 
+
     /*
     Just like startLines, but if lines end up not same length, mutates shorter lines
     until they match the length of the longest line.
-    weights sets the weightings to use when choosing (see *chooseMutation).
+    weights sets the weightings to use when choosing (see mutate).
     If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
     array per line, and those will be used as the weights for that line only. For example
     [
@@ -572,8 +685,7 @@ TTLine {
     like randomCounterPointLines but generates only the starting line for each line type.
     The lines are not guaranteed to be the same length - use startLinesSameLength instead if you
     want that.
-    Apply further mutations yourself, such as using chooseMutation to choose a mutation, then
-    applying it to this line (and repeating this process).
+    Apply further mutations yourself, such as using .mutate.
     */
     *startLines{|key, octaves|
         ^(octaves.collect({|octave, i|
@@ -592,7 +704,7 @@ TTLine {
     and the size determines the number of lines generated. The first line is
     always primary, and last line is always lower. All other lines are secondary.
     key determines the key of the counterpoint.
-    weights sets the weightings to use when choosing (see *chooseMutation).
+    weights sets the weightings to use when choosing (see mutate).
     If it's a 1d array, it will be applied to each line. If it's a 2d array, there should be one
     array per line, and those will be used as the weights for that line only. For example
     [
@@ -613,40 +725,38 @@ TTLine {
         }));
     }
 
-    *randomLine {|beats, line, weights=([0.25,0.25,0.25,0.25])|
-        while { line.beats < beats } {
-            this.chooseMutation(beats, weights).value(line);
-        };
-        ^line; 
-    }
-
-
     /*
     Generates a random primary line in the given key at the given
     octave, randomly performing any allowed operation some number of times.
     key-vector indicates the key, octave indicates the octave of the starting note,
     and beats determines the total beats of the resulting line
-    weights sets the weightings to use when choosing mutations (see *chooseMutation).
+    weights sets the weightings to use when choosing mutations (see mutate).
     */
     *randomPrimaryLine {|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
         var allowedFinalNotes = [3,5,8].select({|interval|
             (interval * 4) <= beats
         });
-        ^this.randomLine(beats, this.basicStepMotion(key, \primary, octave, allowedFinalNotes.choose, beats), weights);
+        var line = this.basicStepMotion(key, \primary, octave, allowedFinalNotes.choose, beats);
+        line.mutateUntilBeats(beats, weights);
+        ^line;
     }
 
     /*
     Just like randomPrimaryLine, but for a secondary line
     */
     *randomSecondaryLine{|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
-        ^this.randomLine(beats, this.randomSecondaryBasicStructure(key, octave, beats), weights);
+        var line = this.randomSecondaryBasicStructure(key, octave, beats);
+        line.mutateUntilBeats(beats, weights);
+        ^line;
     }
 
     /*
     Line randomPrimaryLine, but generates a lower line.
     */
     *randomLowerLine {|key, octave, beats, weights=([0.25,0.25,0.25,0.25])|
-        ^this.randomLine(beats, this.randomBasicArpeggiation(octave, key), weights);
+        var line = this.randomBasicArpeggiation(octave, key);
+        line.mutateUntilBeats(beats, weights);
+        ^line;
     }
 
     /*

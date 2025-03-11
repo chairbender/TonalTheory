@@ -13,7 +13,7 @@ RandomTriadRepeatChoice {
 	}
 
     printOn { |stream|
-        stream << "RandomStepMotionChoice(" << index << ")";
+        stream << "RandomTriadRepeatChoice(" << index << ")";
     }
 
 }

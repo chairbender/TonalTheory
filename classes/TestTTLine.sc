@@ -497,18 +497,18 @@ TestTTLine : UnitTest {
         var choice;
         var line ;
         var expected = TTLine(List[
+            LineNote(\c4, 1),
             LineNote(\e4, 1),
-            LineNote(\e4, 1%/2),
-            LineNote(\d4, 1%/2),
+            LineNote(\e3, 1),
             LineNote(\e4, 1),
-            LineNote(\e5, 1),
-            LineNote(\g4, 1),
+            LineNote(\e4, 1),
             LineNote(\d4, 1),
-            LineNote(\g3, 1),
+            LineNote(\c4, 1),
             LineNote(\c4, 1),
         ], cKey, \primary);
         thisThread.randSeed = 7;
         line = TTLine.randomPrimaryLine(cKey, 4, 32);
+        line.postln;
         this.assert(line == expected); 
     }
 
@@ -517,6 +517,25 @@ TestTTLine : UnitTest {
         thisThread.randSeed = 76;
         line = TTLine.randomSecondaryLine(aMinorKey, 4, 16);
         this.assert(line.beats == 16);
+    }
+
+    test_mutate {
+        var line = TTLine(List[
+            LineNote(\a4, 1),
+            LineNote(\c2, 1),
+            LineNote(\e3, 1),
+            LineNote(\a3, 1)
+        ], aMinorKey, \lower); 
+        var expected = TTLine(List[
+            LineNote(\a4, 1),
+            LineNote(\a1, 1),
+            LineNote(\c2, 1),
+            LineNote(\e3, 1),
+            LineNote(\a3, 1),
+        ], aMinorKey, \lower);
+        thisThread.randSeed = 76;
+        line.mutate(100);
+        this.assert(line == expected); 
     }
 
 }
