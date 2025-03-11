@@ -2,6 +2,8 @@ s.boot;
 
 Quarks.install("https://github.com/smoge/Rational")
 
+Quarks.gui
+
 // run all tests in my project
 (
 TestDiatonicCollection.run;
@@ -13,6 +15,7 @@ TestNoteSymbol.run;
 TestTonalPitchClassSymbol.run;
 TestTTLine.run;
 )
+
 
 // simple example
 (
@@ -26,7 +29,7 @@ TestTTLine.run;
 
 (
     TempoClock.default.tempo = 414/60;
-    TTLine.evolve(Key(\c, true), [5,4,4,3], 8*4);
+    TTLine.evolve(Key(\c, true), [5,4,4,3], 16*4);
 )
 
 // "key progression"
