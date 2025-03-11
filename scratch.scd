@@ -36,13 +36,13 @@ TestTTLine.run;
     var weights = [0.1, 0.7, 0.1, 0.1];
     var keyProg = [
         // I
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\c, true), octaves, weights),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\C), octaves, weights),
         // V
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\g, true), octaves, weights),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\G), octaves, weights),
         // vi
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\a, false), octaves, weights),
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\a), octaves, weights),
         // IV
-        TTLine.randomCounterpointLines(beatsPerKey, Key(\f, true), octaves, weights)
+        TTLine.randomCounterpointLines(beatsPerKey, Key(\F), octaves, weights)
     ];
     TempoClock.default.tempo = 414/60;
     ~p = Pseq(keyProg.collect({|lines|
